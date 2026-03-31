@@ -1,0 +1,687 @@
+# 🚀 InteractHub — Social Media Web Application
+
+> **Full-Stack Assignment | ASP.NET Core 8 + React 18 + Azure**  
+> Tổng điểm: **10 điểm** | Deadline: *(xem đề cương môn học)*
+
+---
+
+## 📋 Mục lục
+
+1. [Tổng quan kiến trúc](#1-tổng-quan-kiến-trúc)
+2. [Tech Stack](#2-tech-stack)
+3. [Phân tích điểm số](#3-phân-tích-điểm-số)
+4. [Roadmap & Phases](#4-roadmap--phases)
+5. [Cấu trúc thư mục](#5-cấu-trúc-thư-mục)
+6. [Chi tiết từng Phase](#6-chi-tiết-từng-phase)
+7. [Database Schema](#7-database-schema)
+8. [API Endpoints](#8-api-endpoints)
+9. [Checklist hoàn thành](#9-checklist-hoàn-thành)
+
+---
+
+## 1. Tổng quan kiến trúc
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    AZURE CLOUD                            │
+│  ┌────────────────┐     ┌──────────────────────────────┐ │
+│  │  Azure Static  │     │     Azure App Service        │ │
+│  │  Web Apps /    │────▶│   ASP.NET Core 8 Web API     │ │
+│  │  React SPA     │     │   (REST + SignalR)            │ │
+│  └────────────────┘     └──────────┬───────────────────┘ │
+│                                    │                      │
+│                         ┌──────────▼──────────┐          │
+│                         │  Azure SQL Database  │          │
+│                         └─────────────────────┘          │
+│                                    │                      │
+│                         ┌──────────▼──────────┐          │
+│                         │  Azure Blob Storage  │          │
+│                         │  (Images/Files)      │          │
+│                         └─────────────────────┘          │
+└──────────────────────────────────────────────────────────┘
+        ▲
+        │ CI/CD (GitHub Actions / Azure DevOps)
+        │
+   Git Push → Build → Test → Deploy
+```
+
+---
+
+## 2. Tech Stack
+
+| Layer | Công nghệ | Version |
+|-------|-----------|---------|
+| **Frontend** | React + TypeScript | 18+ / Strict Mode |
+| **Styling** | Tailwind CSS | Latest |
+| **State** | React Context API / Redux Toolkit | — |
+| **Forms** | React Hook Form | — |
+| **HTTP** | Axios | — |
+| **Routing** | React Router | v6+ |
+| **Build** | Vite | — |
+| **Backend** | ASP.NET Core Web API | 8.0+ |
+| **ORM** | Entity Framework Core | 8.0+ |
+| **Database** | SQL Server / Azure SQL | — |
+| **Auth** | JWT + ASP.NET Core Identity | — |
+| **Real-time** | SignalR | — |
+| **Docs** | Swagger / OpenAPI | — |
+| **Cloud** | Microsoft Azure | App Service + SQL + Blob |
+| **CI/CD** | GitHub Actions / Azure DevOps | — |
+| **Testing** | xUnit / NUnit + Moq | — |
+
+---
+
+## 3. Phân tích điểm số
+
+```
+10 điểm tổng
+├── F1 — React Component Architecture & Responsive Design     1đ
+├── F2 — State Management & API Integration                   1đ
+├── F3 — React Forms & Validation                             1đ
+├── F4 — Routing, Protected Routes & Dynamic Features         1đ
+├── B1 — Database Design & Entity Framework                   1đ
+├── B2 — RESTful API Controllers & DTOs                       1đ
+├── B3 — JWT Authentication & Authorization                   1đ
+├── B4 — Business Logic & Services Layer                      1đ
+├── T1 — Unit Testing                                         1đ
+└── D1 — Azure Deployment & CI/CD Pipeline                    1đ
+```
+
+---
+
+## 4. Roadmap & Phases
+
+```
+Phase 0     Phase 1        Phase 2        Phase 3       Phase 4
+Setup    →  Backend Core → Frontend    → Testing    → Deployment
+(1-2 ngày)  (5-7 ngày)    (5-7 ngày)   (2-3 ngày)   (2-3 ngày)
+```
+
+| Phase | Tên | Yêu cầu liên quan | Ước tính |
+|-------|-----|-------------------|----------|
+| **0** | Setup & Scaffolding | — | 1–2 ngày |
+| **1** | Backend Core (DB + API + Auth + Services) | B1, B2, B3, B4 | 5–7 ngày |
+| **2** | Frontend (Components + State + Forms + Routing) | F1, F2, F3, F4 | 5–7 ngày |
+| **3** | Testing | T1 | 2–3 ngày |
+| **4** | Deployment & CI/CD | D1 | 2–3 ngày |
+
+> ⚠️ **Lưu ý quan trọng:** Backend phải làm trước Frontend vì Frontend gọi API từ Backend.
+
+---
+
+## 5. Cấu trúc thư mục
+
+```
+InteractHub/
+│
+├── 📁 InteractHub.API/                  ← ASP.NET Core Web API
+│   ├── Controllers/
+│   │   ├── AuthController.cs
+│   │   ├── PostsController.cs
+│   │   ├── UsersController.cs
+│   │   ├── FriendsController.cs
+│   │   ├── StoriesController.cs
+│   │   └── NotificationsController.cs
+│   ├── Data/
+│   │   ├── AppDbContext.cs
+│   │   └── Migrations/
+│   ├── DTOs/
+│   │   ├── Request/
+│   │   └── Response/
+│   ├── Entities/
+│   │   ├── User.cs
+│   │   ├── Post.cs
+│   │   ├── Comment.cs
+│   │   ├── Like.cs
+│   │   ├── Friendship.cs
+│   │   ├── Story.cs
+│   │   ├── Notification.cs
+│   │   ├── Hashtag.cs
+│   │   └── PostReport.cs
+│   ├── Interfaces/
+│   ├── Services/
+│   │   ├── AuthService.cs
+│   │   ├── PostsService.cs
+│   │   ├── FriendsService.cs
+│   │   ├── NotificationService.cs
+│   │   ├── StoriesService.cs
+│   │   └── FileUploadService.cs
+│   ├── Hubs/
+│   │   └── NotificationHub.cs           ← SignalR
+│   ├── Helpers/
+│   └── Program.cs
+│
+├── 📁 InteractHub.Tests/                ← xUnit Test Project
+│   ├── Services/
+│   │   ├── AuthServiceTests.cs
+│   │   ├── PostsServiceTests.cs
+│   │   └── FriendsServiceTests.cs
+│   └── Helpers/
+│
+├── 📁 interacthub-client/               ← React + TypeScript
+│   ├── src/
+│   │   ├── components/                  ← ≥15 reusable components
+│   │   │   ├── common/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── TextInput.tsx
+│   │   │   │   ├── FileInput.tsx
+│   │   │   │   ├── Avatar.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── LoadingSkeleton.tsx
+│   │   │   │   └── Pagination.tsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Navbar.tsx
+│   │   │   │   └── Sidebar.tsx
+│   │   │   ├── posts/
+│   │   │   │   ├── PostCard.tsx
+│   │   │   │   ├── PostForm.tsx
+│   │   │   │   └── CommentSection.tsx
+│   │   │   ├── auth/
+│   │   │   │   └── ProtectedRoute.tsx
+│   │   │   └── notifications/
+│   │   │       └── NotificationBell.tsx
+│   │   ├── pages/
+│   │   │   ├── HomePage.tsx
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── RegisterPage.tsx
+│   │   │   ├── ProfilePage.tsx
+│   │   │   └── StoriesPage.tsx
+│   │   ├── context/                     ← hoặc redux/
+│   │   │   └── AuthContext.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── usePosts.ts
+│   │   │   └── useDebounce.ts
+│   │   ├── services/
+│   │   │   ├── api.ts                   ← Axios instance
+│   │   │   ├── authService.ts
+│   │   │   └── postService.ts
+│   │   ├── types/
+│   │   │   └── index.ts                 ← TypeScript interfaces
+│   │   ├── router/
+│   │   │   └── AppRouter.tsx
+│   │   └── App.tsx
+│   └── package.json
+│
+├── 📁 .github/workflows/
+│   └── azure-deploy.yml                 ← CI/CD pipeline
+│
+└── README.md
+```
+
+---
+
+## 6. Chi tiết từng Phase
+
+---
+
+### ⚙️ Phase 0 — Setup & Scaffolding *(1–2 ngày)*
+
+**Mục tiêu:** Cài đặt môi trường, tạo solution, init project
+
+#### Bước thực hiện:
+
+```bash
+# 1. Tạo solution
+dotnet new sln -n InteractHub
+
+# 2. Tạo Web API project
+dotnet new webapi -n InteractHub.API --framework net8.0
+dotnet sln add InteractHub.API
+
+# 3. Tạo Test project
+dotnet new xunit -n InteractHub.Tests
+dotnet sln add InteractHub.Tests
+
+# 4. Cài packages cho API
+cd InteractHub.API
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Swashbuckle.AspNetCore
+dotnet add package Azure.Storage.Blobs
+dotnet add package Microsoft.AspNetCore.SignalR
+
+# 5. Tạo React app
+npm create vite@latest interacthub-client -- --template react-ts
+cd interacthub-client
+npm install axios react-router-dom react-hook-form @microsoft/signalr
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+---
+
+### 🗄️ Phase 1 — Backend Core *(5–7 ngày)*
+
+> Covers: **B1, B2, B3, B4**
+
+#### B1 — Database Design & Entity Framework *(1.5 ngày)*
+
+**Các entity cần tạo (≥ 8):**
+
+| Entity | Quan hệ chính |
+|--------|--------------|
+| `User` (extends IdentityUser) | 1-N với Post, Comment, Like |
+| `Post` | N-1 User; 1-N Comment, Like; N-N Hashtag | (Có thêm Self-reference cho Share (OriginalPostId))
+| `Comment` | N-1 Post, User |
+| `Like` | N-1 Post/Comment, User |
+| `Friendship` | N-N User (self-referencing) |
+| `Story` | N-1 User |
+| `Notification` | N-1 User (sender + receiver) |
+| `Hashtag` | N-N Post |
+| `PostReport` | N-1 Post, User |
+
+**Checklist B1:**
+- [ ] Tạo tất cả entity class với Data Annotations
+- [ ] Cấu hình `AppDbContext` kế thừa `IdentityDbContext<User>`
+- [ ] Cấu hình Fluent API cho quan hệ phức tạp
+- [ ] Tạo ít nhất **3 migration files** (`InitialCreate`, `SeedRoles`, `AddIndexes`)
+- [ ] Seed data: Admin user, roles (User/Admin), sample posts
+- [ ] Vẽ database diagram (dùng dbdiagram.io hoặc SSMS)
+
+#### B3 — JWT Authentication & Authorization *(1.5 ngày)*
+
+> Làm B3 **trước B2** để có auth flow cho các endpoint.
+
+**Checklist B3:**
+- [ ] `AuthController` với `POST /api/auth/register` và `POST /api/auth/login`
+- [ ] JWT service tạo token (secret, issuer, audience, expiry trong `appsettings.json`)
+- [ ] `User` entity thêm fields: `FullName`, `AvatarUrl`, `Bio`, `CreatedAt`
+- [ ] Seed roles: `User`, `Admin`
+- [ ] `[Authorize]` attribute trên các protected endpoints
+- [ ] Login response trả về: `{ token, expiresIn, user: {...} }`
+- [ ] Role-based authorization với [Authorize(Roles = "Admin")]
+
+#### B2 — RESTful API Controllers & DTOs *(2 ngày)*
+
+**6 Controllers cần tạo (≥ 20 endpoints):**
+
+| Controller | Endpoints tiêu biểu |
+|------------|---------------------|
+| `AuthController` | Register, Login |
+| `PostsController` | CRUD posts, Like, Comment, Share |
+| `UsersController` | Get profile, Update profile, Search users |
+| `FriendsController` | Send/Accept/Decline/Remove friend request |
+| `StoriesController` | Create, Get, Delete story |
+| `NotificationsController` | Get all, Mark as read |
+| `HashtagsController` | Get trending hashtags |
+| `AdminController` | Manage reports, moderation |
+
+**Checklist B2:**
+- [ ] Tất cả controller dùng `[ApiController]` và `[Route("api/[controller]")]`
+- [ ] Tạo Request DTOs và Response DTOs riêng biệt
+- [ ] HTTP status codes chuẩn: `200`, `201`, `400`, `401`, `404`, `500`
+- [ ] Response format thống nhất: `{ success, data, message, errors }`
+- [ ] CORS config trong `Program.cs` cho phép React origin
+- [ ] Swagger UI hoạt động tại `/swagger`
+- [ ] Global Exception Middleware (handle 400, 401, 500)
+- [ ] Model validation với Data Annotations (Required, Email, StringLength)
+- [ ] Validate DTO trước khi xử lý
+
+#### B4 — Business Logic & Services Layer *(1.5 ngày)*
+
+**5 Service classes cần tạo:**
+
+| Service | Trách nhiệm |
+|---------|-------------|
+| `AuthService` | Register, Login, Token generation |
+| `PostsService` | CRUD, Like, Comment logic |
+| `FriendsService` | Friend request workflow |
+| `NotificationService` | Tạo và gửi notification |
+| `FileUploadService` | Upload ảnh lên Azure Blob Storage |
+| `HashtagService` | Xử lý hashtag & trending |
+
+**Checklist B4:**
+- [ ] Interface cho mỗi service (`IAuthService`, v.v.)
+- [ ] Đăng ký DI trong `Program.cs`
+- [ ] Repository pattern cho data access (BẮT BUỘC theo đề bài)
+- [ ] Business rules: không thể like bài của chính mình, không duplicate friend request, v.v.
+
+---
+
+### 🎨 Phase 2 — Frontend *(5–7 ngày)*
+
+> Covers: **F1, F2, F3, F4**
+
+#### F1 — React Components & Responsive Design *(1.5 ngày)*
+
+**Checklist F1:**
+- [ ] ≥ 15 React components với TypeScript interfaces đầy đủ
+- [ ] Tailwind CSS responsive (mobile-first: `sm:`, `md:`, `lg:`)
+- [ ] Responsive Navbar (hamburger menu trên mobile)
+- [ ] Custom hooks: `useAuth`, `usePosts`, `useDebounce`, `useLocalStorage`
+- [ ] Viết component hierarchy documentation (dạng tree)
+- [ ] Chụp screenshot trên 3 kích thước: mobile / tablet / desktop
+
+#### F2 — State Management & API Integration *(1.5 ngày)*
+
+**Checklist F2:**
+- [ ] `AuthContext` (hoặc Redux slice) lưu: `user`, `token`, `isAuthenticated`
+- [ ] Axios instance với `baseURL` và interceptor tự gắn `Authorization: Bearer <token>`
+- [ ] Token lưu trong `localStorage`, tự load khi khởi động app
+- [ ] API service files riêng: `authService.ts`, `postService.ts`, v.v.
+- [ ] TypeScript interfaces cho tất cả API response
+- [ ] Loading states và error handling ở mỗi component
+
+#### F3 — Forms & Validation *(1.5 ngày)*
+
+**Checklist F3:**
+- [ ] **Register form:** username, email, password, confirm password
+- [ ] **Login form:** email, password, error message rõ ràng
+- [ ] **Post creation form:** text content + image upload với preview
+- [ ] **Profile update form:** fullName, bio, avatar
+- [ ] React Hook Form cho tất cả forms
+- [ ] Password strength indicator (Weak / Medium / Strong)
+- [ ] Reusable `<TextInput />`, `<FileInput />` với TypeScript props
+- [ ] Loading spinner khi đang submit
+
+#### F4 — Routing, Protected Routes & Dynamic Features *(2 ngày)*
+
+**Checklist F4:**
+- [ ] React Router v6 với nested routes
+- [ ] `<ProtectedRoute>` component — redirect về `/login` nếu chưa auth
+- [ ] Search với `useDebounce` (debounce 300ms trước khi gọi API)
+- [ ] Infinite scroll **hoặc** pagination cho feed
+- [ ] `React.lazy()` + `<Suspense>` cho route-level code splitting
+- [ ] Loading skeletons cho PostCard, UserCard
+- [ ] SignalR client kết nối để nhận notification real-time
+
+---
+
+### 🧪 Phase 3 — Testing *(2–3 ngày)*
+
+> Covers: **T1** — Cần ít nhất **15 unit test methods**
+
+**Checklist T1:**
+- [ ] Test project dùng xUnit + Moq
+- [ ] Tests cho **AuthService**: register thành công, email trùng, sai password
+- [ ] Tests cho **PostsService**: tạo post, xóa post của người khác (lỗi), like/unlike
+- [ ] Tests cho **FriendsService**: gửi request, chấp nhận, từ chối, request trùng
+- [ ] Mock `AppDbContext` hoặc dùng In-Memory Database
+- [ ] Test cả positive cases và negative/edge cases
+- [ ] Chạy `dotnet test --collect:"XPlat Code Coverage"` → xuất coverage report
+- [ ] Coverage ≥ 60% cho service layer
+
+```bash
+# Chạy test và xem coverage
+dotnet test --collect:"XPlat Code Coverage"
+reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+```
+
+---
+
+### ☁️ Phase 4 — Azure Deployment & CI/CD *(2–3 ngày)*
+
+> Covers: **D1**
+
+#### Azure Resources cần tạo:
+
+| Resource | Dùng cho |
+|----------|----------|
+| Resource Group | Nhóm tất cả resources |
+| App Service (Windows/Linux) | Host .NET API |
+| Azure SQL Database | Production DB |
+| Azure Blob Storage | Lưu ảnh upload |
+| Application Insights | Monitoring & logs |
+| Static Web App *(optional)* | Host React SPA |
+
+#### GitHub Actions workflow mẫu (`.github/workflows/azure-deploy.yml`):
+
+```yaml
+name: Build and Deploy to Azure
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+          
+      - name: Restore & Build
+        run: |
+          dotnet restore
+          dotnet build --no-restore
+          
+      - name: Run Tests
+        run: dotnet test --no-build --verbosity normal
+
+  deploy-api:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Publish
+        run: dotnet publish InteractHub.API -c Release -o ./publish
+        
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_APP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: ./publish
+
+  deploy-frontend:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build React
+        run: |
+          cd interacthub-client
+          npm ci
+          npm run build
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          app_location: "interacthub-client"
+          output_location: "dist"
+```
+
+**Checklist D1:**
+- [ ] Tạo tất cả Azure resources
+- [ ] Connection string trong Azure App Service Configuration (không commit lên git)
+- [ ] CI/CD pipeline chạy thành công ít nhất 1 lần
+- [ ] App live trên URL Azure
+- [ ] Application Insights setup
+- [ ] Viết deployment documentation có ảnh chụp màn hình
+
+---
+
+## 7. Database Schema
+
+```
+┌──────────────┐     ┌──────────────┐                             ┌──────────────┐
+│   AspNetUsers│     │    Post      │                             │   Comment    │
+│ (User)       │─1──N│              │─1──────────────────────────N│              │
+│ Id           │     │ Id           │                             │ Id           │
+│ FullName     │     │ Content      │                             │ Content      │
+│ AvatarUrl    │     │ ImageUrl     │                             │ CreatedAt    │
+│ Bio          │     │ CreatedAt    |                             |              |
+|              |     |OriginalPostId (FK - self reference)│       │ UserId (FK)  │
+│ CreatedAt    │     │ UserId (FK)  │                             │ PostId (FK)  │
+└──────────────┘     └──────┬───────┘                             └──────────────┘
+       │                    │
+       │             ┌──────▼───────┐     ┌──────────────┐
+       │             │     Like     │     │   Hashtag    │
+       │             │ Id           │     │ Id           │
+       │             │ UserId (FK)  │     │ Name         │
+       │             │ PostId (FK)  │     └──────┬───────┘
+       │             └──────────────┘            │ N-N via PostHashtag
+       │
+       │  ┌──────────────┐     ┌──────────────┐
+       ├──│  Friendship  │     │    Story     │
+       │  │ Id           │     │ Id           │
+       │  │ SenderId(FK) │     │ MediaUrl     │
+       │  │ ReceiverId(FK)│     │ ExpiresAt   │
+       │  │ Status       │     │ UserId (FK)  │
+       │  └──────────────┘     └──────────────┘
+       │
+       │  ┌──────────────┐     ┌──────────────┐
+       ├──│ Notification │     │  PostReport  │
+          │ Id           │     │ Id           │
+          │ Type         │     │ Reason       │
+          │ Content      │     │ PostId (FK)  |
+          │ IsRead       │     │ UserId (FK)  │
+          │ UserId (FK)  │     └──────────────┘
+          └──────────────┘
+```
+
+---
+
+## 8. API Endpoints
+
+### Auth
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| POST | `/api/auth/register` | ❌ | Đăng ký tài khoản |
+| POST | `/api/auth/login` | ❌ | Đăng nhập, trả JWT |
+
+### Posts
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| GET | `/api/posts` | ✅ | Lấy feed bài viết |
+| POST | `/api/posts` | ✅ | Tạo bài viết mới |
+| GET | `/api/posts/{id}` | ✅ | Chi tiết bài viết |
+| PUT | `/api/posts/{id}` | ✅ | Sửa bài viết |
+| DELETE | `/api/posts/{id}` | ✅ | Xóa bài viết |
+| POST | `/api/posts/{id}/like` | ✅ | Like / Unlike |
+| POST | `/api/posts/{id}/comments` | ✅ | Thêm comment |
+| POST | `/api/posts/{id}/share` | ✅ | Share bài viết |
+
+### Users
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| GET | `/api/users/{id}` | ✅ | Xem profile |
+| PUT | `/api/users/{id}` | ✅ | Cập nhật profile |
+| GET | `/api/users/search?q=` | ✅ | Tìm kiếm user |
+
+### Friends
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| POST | `/api/friends/request/{userId}` | ✅ | Gửi lời mời |
+| PUT | `/api/friends/accept/{userId}` | ✅ | Chấp nhận |
+| PUT | `/api/friends/decline/{userId}` | ✅ | Từ chối |
+| DELETE | `/api/friends/{userId}` | ✅ | Hủy kết bạn |
+| GET | `/api/friends` | ✅ | Danh sách bạn bè |
+
+### Stories
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| GET | `/api/stories` | ✅ | Stories của bạn bè |
+| POST | `/api/stories` | ✅ | Đăng story |
+| DELETE | `/api/stories/{id}` | ✅ | Xóa story |
+
+### Notifications
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| GET | `/api/notifications` | ✅ | Tất cả notifications |
+| PUT | `/api/notifications/{id}/read` | ✅ | Đánh dấu đã đọc |
+| PUT | `/api/notifications/read-all` | ✅ | Đánh dấu tất cả |
+
+### Hashtags
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| GET | `/api/hashtags/trending` | ✅ | Lấy hashtag trending |
+
+### Admin (Moderation)
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|-------|
+| GET | `/api/admin/reports` | ✅ (Admin) | Danh sách report |
+| PUT | `/api/admin/reports/{id}/resolve` | ✅ (Admin) | Xử lý report |
+| DELETE | `/api/posts/{id}` | ✅ (Admin) | Xóa bài vi phạm |
+
+---
+
+## 9. Checklist hoàn thành
+
+### Phase 0 — Setup
+- [ ] Solution và projects tạo xong
+- [ ] Tất cả NuGet packages đã cài
+- [ ] React app với Tailwind chạy được
+- [ ] Git repository khởi tạo, `.gitignore` đúng
+
+### B1 — Database (1đ)
+- [ ] ≥ 9 entity classes
+- [ ] DbContext cấu hình đúng
+- [ ] ≥ 3 migration files
+- [ ] Seed data hoạt động
+- [ ] Database diagram
+
+### B2 — API Controllers (1đ)
+- [ ] ≥ 7 controllers
+- [ ] ≥ 20 endpoints
+- [ ] DTOs cho request & response
+- [ ] CORS config
+- [ ] Swagger hoạt động
+
+### B3 — JWT Auth (1đ)
+- [ ] Register & Login endpoints
+- [ ] JWT token generation
+- [ ] Protected endpoints với `[Authorize]`
+- [ ] Role-based authorization (User/Admin) + Admin-only endpoints
+
+### B4 — Services (1đ)
+- [ ] ≥ 6 service classes (Auth, Posts, Friends, Notification, FileUpload, Hashtag)
+- [ ] Repository pattern implemented
+- [ ] DI đăng ký đúng
+- [ ] FileUploadService cho Azure Blob
+
+### F1 — Components (1đ)
+- [ ] ≥ 15 components TypeScript
+- [ ] Tailwind responsive
+- [ ] Custom hooks
+- [ ] Component hierarchy doc
+
+### F2 — State & API (1đ)
+- [ ] AuthContext / Redux store
+- [ ] Axios với interceptor
+- [ ] TypeScript interfaces cho API
+
+### F3 — Forms (1đ)
+- [ ] React Hook Form cho tất cả forms
+- [ ] Validation đầy đủ
+- [ ] Image upload + preview
+
+### F4 — Routing (1đ)
+- [ ] Protected routes
+- [ ] Search với debounce
+- [ ] Lazy loading
+- [ ] SignalR client
+
+### T1 — Tests (1đ)
+- [ ] ≥ 15 test methods
+- [ ] 3 service classes được test
+- [ ] Coverage ≥ 60%
+- [ ] Cả positive và negative cases
+
+### D1 — Deployment (1đ)
+- [ ] App live trên Azure URL
+- [ ] CI/CD pipeline YAML
+- [ ] Azure SQL + Blob configured
+- [ ] Deployment documentation
+
+---
+
+## ⚡ Tips để đạt điểm cao
+
+1. **Không commit secrets** — dùng `dotnet user-secrets` cho dev, Azure App Config cho prod
+2. **Response format nhất quán** — tạo `ApiResponse<T>` wrapper dùng cho tất cả endpoints
+3. **Error handling tập trung** — dùng `middleware` hoặc `exception filter` thay vì try-catch khắp nơi
+4. **Swagger XML comments** — thêm `///` comments cho controllers để Swagger doc đẹp hơn
+5. **TypeScript strict mode** — không dùng `any`, luôn type đầy đủ
+6. **Git commits rõ ràng** — commit theo từng feature, CI/CD pipeline sẽ có lịch sử đẹp
+7. **Áp dụng Repository Pattern + Service Layer** - để tách biệt data access và business logic (theo yêu cầu đề)
+---
+
+*README này được tạo dựa trên phân tích đề bài InteractHub Full-Stack Assignment.*
