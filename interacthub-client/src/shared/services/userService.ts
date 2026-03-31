@@ -1,5 +1,5 @@
 import { axiosClient } from '../api/axiosClient'
-import type { ApiResponse } from '../types/api'
+import type { ApiResponse, PagedResult } from '../types/api'
 import type { UpdateProfileRequest, UserSummary } from '../types/user'
 
 async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>): Promise<T> {
@@ -17,10 +17,10 @@ export const userService = {
   updateProfile(userId: string, payload: UpdateProfileRequest): Promise<UserSummary> {
     return unwrap(axiosClient.put<ApiResponse<UserSummary>>(`/users/${userId}`, payload))
   },
-  search(keyword: string): Promise<UserSummary[]> {
+  search(keyword: string, page: number, pageSize: number): Promise<PagedResult<UserSummary>> {
     return unwrap(
-      axiosClient.get<ApiResponse<UserSummary[]>>('/users/search', {
-        params: { q: keyword },
+      axiosClient.get<ApiResponse<PagedResult<UserSummary>>>('/users/search', {
+        params: { q: keyword, page, pageSize },
       }),
     )
   },

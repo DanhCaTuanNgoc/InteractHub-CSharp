@@ -10,15 +10,19 @@ export function usePosts() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalPosts, setTotalPosts] = useState(0)
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (page: number) => {
     setLoading(true)
     setError(null)
 
     try {
-      const feed = await postService.getFeed()
-      setPosts(feed)
-      setCurrentPage(1)
+      const feed = await postService.getFeed(page, PAGE_SIZE)
+      setPosts(feed.items)
+      setCurrentPage(feed.page)
+      setTotalPages(feed.totalPages)
+      setTotalPosts(feed.totalCount)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải feed.')
     } finally {
@@ -27,23 +31,24 @@ export function usePosts() {
   }, [])
 
   useEffect(() => {
-    void fetchPosts()
-  }, [fetchPosts])
+    void fetchPosts(currentPage)
+  }, [currentPage, fetchPosts])
 
   const createPost = useCallback(async (content: string, imageUrl?: string) => {
     setSaving(true)
     setError(null)
 
     try {
-      const created = await postService.create({ content, imageUrl })
-      setPosts((current) => [created, ...current])
+      await postService.create({ content, imageUrl })
+      setCurrentPage(1)
+      await fetchPosts(1)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tạo bài viết.')
       throw err
     } finally {
       setSaving(false)
     }
-  }, [])
+  }, [fetchPosts])
 
   const toggleLike = useCallback(async (postId: string) => {
     try {
@@ -54,20 +59,16 @@ export function usePosts() {
     }
   }, [])
 
-  const totalPages = useMemo(() => Math.max(1, Math.ceil(posts.length / PAGE_SIZE)), [posts.length])
-
-  const paginatedPosts = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE
-    return posts.slice(start, start + PAGE_SIZE)
-  }, [currentPage, posts])
+  const hasPosts = useMemo(() => posts.length > 0, [posts.length])
 
   return {
-    posts: paginatedPosts,
-    totalPosts: posts.length,
+    posts,
+    totalPosts,
     totalPages,
     currentPage,
     loading,
     saving,
+    hasPosts,
     error,
     setCurrentPage,
     fetchPosts,

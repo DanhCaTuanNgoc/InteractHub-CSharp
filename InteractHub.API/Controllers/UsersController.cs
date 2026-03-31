@@ -51,15 +51,15 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string q)
+    public async Task<IActionResult> Search([FromQuery] string q, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (string.IsNullOrWhiteSpace(q))
         {
-            return BadRequest(ApiResponse<List<UserSummaryResponse>>.Fail("Query không hợp lệ."));
+            return BadRequest(ApiResponse<PagedResult<UserSummaryResponse>>.Fail("Query không hợp lệ."));
         }
 
-        var users = await _usersService.SearchAsync(q);
-        return Ok(ApiResponse<List<UserSummaryResponse>>.Ok(users));
+        var users = await _usersService.SearchAsync(q, page, pageSize);
+        return Ok(ApiResponse<PagedResult<UserSummaryResponse>>.Ok(users));
     }
 
     private string GetCurrentUserId()

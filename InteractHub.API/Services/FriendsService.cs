@@ -8,10 +8,12 @@ namespace InteractHub.API.Services;
 public class FriendsService : IFriendsService
 {
     private readonly IRepository<Friendship> _friendshipsRepository;
+    private readonly INotificationsService _notificationsService;
 
-    public FriendsService(IRepository<Friendship> friendshipsRepository)
+    public FriendsService(IRepository<Friendship> friendshipsRepository, INotificationsService notificationsService)
     {
         _friendshipsRepository = friendshipsRepository;
+        _notificationsService = notificationsService;
     }
 
     public async Task<FriendshipResponse> SendRequestAsync(string senderId, string receiverId)
@@ -41,6 +43,12 @@ public class FriendsService : IFriendsService
         await _friendshipsRepository.AddAsync(friendship);
         await _friendshipsRepository.SaveChangesAsync();
 
+        await _notificationsService.CreateAsync(
+            senderId,
+            receiverId,
+            "FriendRequest",
+            "Bạn có một lời mời kết bạn mới.");
+
         var created = await _friendshipsRepository.Query()
             .Include(f => f.Sender)
             .Include(f => f.Receiver)
@@ -68,6 +76,12 @@ public class FriendsService : IFriendsService
         friendship.UpdatedAt = DateTime.UtcNow;
         _friendshipsRepository.Update(friendship);
         await _friendshipsRepository.SaveChangesAsync();
+
+        await _notificationsService.CreateAsync(
+            receiverId,
+            senderId,
+            "FriendRequestAccepted",
+            "Lời mời kết bạn của bạn đã được chấp nhận.");
 
         return friendship.ToFriendshipResponse();
     }

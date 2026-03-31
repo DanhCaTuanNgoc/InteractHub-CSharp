@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
+import { Pagination } from '../shared/components/common/Pagination'
 import { TextInput } from '../shared/components/common/TextInput'
 import { UserCard } from '../shared/components/common/UserCard'
 import { useDebounce } from '../shared/hooks/useDebounce'
 import { userService } from '../shared/services/userService'
 import type { UserSummary } from '../shared/types/user'
 
+const PAGE_SIZE = 8
+
 export function ExplorePage() {
   const [query, setQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [users, setUsers] = useState<UserSummary[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -17,6 +22,8 @@ export function ExplorePage() {
   useEffect(() => {
     if (!debouncedQuery.trim()) {
       setUsers([])
+      setCurrentPage(1)
+      setTotalPages(1)
       setError(null)
       return
     }
@@ -26,8 +33,9 @@ export function ExplorePage() {
       setError(null)
 
       try {
-        const data = await userService.search(debouncedQuery)
-        setUsers(data)
+        const data = await userService.search(debouncedQuery, currentPage, PAGE_SIZE)
+        setUsers(data.items)
+        setTotalPages(data.totalPages)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không thể tìm kiếm người dùng.')
       } finally {
@@ -36,6 +44,10 @@ export function ExplorePage() {
     }
 
     void search()
+  }, [currentPage, debouncedQuery])
+
+  useEffect(() => {
+    setCurrentPage(1)
   }, [debouncedQuery])
 
   return (
@@ -67,6 +79,8 @@ export function ExplorePage() {
             ))}
           </div>
         )}
+
+        {!loading ? <Pagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} /> : null}
       </article>
     </section>
   )

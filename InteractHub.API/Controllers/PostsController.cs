@@ -21,10 +21,10 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetFeed()
+    public async Task<IActionResult> GetFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
     {
-        var data = await _postsService.GetFeedAsync();
-        return Ok(ApiResponse<List<PostResponse>>.Ok(data));
+        var data = await _postsService.GetFeedAsync(page, pageSize);
+        return Ok(ApiResponse<PagedResult<PostResponse>>.Ok(data));
     }
 
     [HttpGet("{id:guid}")]

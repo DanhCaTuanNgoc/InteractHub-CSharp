@@ -1,3 +1,4 @@
+using InteractHub.API.DTOs.Common;
 using InteractHub.API.DTOs.Request;
 using InteractHub.API.DTOs.Response;
 
@@ -7,5 +8,5 @@ public interface IUsersService
 {
     Task<UserSummaryResponse?> GetProfileAsync(string userId);
     Task<UserSummaryResponse?> UpdateProfileAsync(string userId, UpdateProfileRequest request);
-    Task<List<UserSummaryResponse>> SearchAsync(string keyword);
+    Task<PagedResult<UserSummaryResponse>> SearchAsync(string keyword, int page, int pageSize);
 }

@@ -9,15 +9,23 @@ export function Pagination({ currentPage, totalPages, onChange }: PaginationProp
     return null
   }
 
+  const gotoPage = (nextPage: number) => {
+    if (nextPage < 1 || nextPage > totalPages || nextPage === currentPage) {
+      return
+    }
+
+    onChange(nextPage)
+  }
+
   return (
     <nav className="pagination" aria-label="Pagination">
-      <button type="button" onClick={() => onChange(currentPage - 1)} disabled={currentPage === 1}>
+      <button type="button" onClick={() => gotoPage(currentPage - 1)} disabled={currentPage === 1}>
         Trước
       </button>
       <span>
         Trang {currentPage} / {totalPages}
       </span>
-      <button type="button" onClick={() => onChange(currentPage + 1)} disabled={currentPage === totalPages}>
+      <button type="button" onClick={() => gotoPage(currentPage + 1)} disabled={currentPage === totalPages}>
         Sau
       </button>
     </nav>

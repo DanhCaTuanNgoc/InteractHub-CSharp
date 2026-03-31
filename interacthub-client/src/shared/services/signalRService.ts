@@ -4,7 +4,7 @@ import { getAccessToken } from '../auth/tokenStorage'
 let notificationConnection: HubConnection | null = null
 
 function buildHubUrl(): string {
-  const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'https://localhost:7058/api'
+  const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:5191/api'
   return apiBase.replace('/api', '/hubs/notifications')
 }
 

@@ -4,7 +4,7 @@ import { clearAuthStorage, getAccessToken } from '../auth/tokenStorage'
 export const AUTH_UNAUTHORIZED_EVENT = 'auth:unauthorized'
 
 export const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:7058/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5191/api',
   timeout: 15000,
 })
 

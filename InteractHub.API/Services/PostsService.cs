@@ -1,3 +1,4 @@
+using InteractHub.API.DTOs.Common;
 using System.Text.RegularExpressions;
 using InteractHub.API.DTOs.Request;
 using InteractHub.API.DTOs.Response;
@@ -15,6 +16,7 @@ public class PostsService : IPostsService
     private readonly IRepository<Hashtag> _hashtagsRepository;
     private readonly IRepository<PostHashtag> _postHashtagsRepository;
     private readonly IRepository<PostReport> _postReportsRepository;
+    private readonly INotificationsService _notificationsService;
 
     public PostsService(
         IRepository<Post> postsRepository,
@@ -22,7 +24,8 @@ public class PostsService : IPostsService
         IRepository<Comment> commentsRepository,
         IRepository<Hashtag> hashtagsRepository,
         IRepository<PostHashtag> postHashtagsRepository,
-        IRepository<PostReport> postReportsRepository)
+        IRepository<PostReport> postReportsRepository,
+        INotificationsService notificationsService)
     {
         _postsRepository = postsRepository;
         _likesRepository = likesRepository;
@@ -30,15 +33,26 @@ public class PostsService : IPostsService
         _hashtagsRepository = hashtagsRepository;
         _postHashtagsRepository = postHashtagsRepository;
         _postReportsRepository = postReportsRepository;
+        _notificationsService = notificationsService;
     }
 
-    public async Task<List<PostResponse>> GetFeedAsync()
+    public async Task<PagedResult<PostResponse>> GetFeedAsync(int page, int pageSize)
     {
-        var posts = await BuildPostQuery()
-            .OrderByDescending(p => p.CreatedAt)
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
+
+        var query = BuildPostQuery()
+            .AsNoTracking()
+            .OrderByDescending(p => p.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var posts = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        return posts.Select(p => p.ToPostResponse()).ToList();
+        var items = posts.Select(p => p.ToPostResponse()).ToList();
+        return PagedResult<PostResponse>.Create(items, page, pageSize, totalCount);
     }
 
     public async Task<PostResponse?> GetByIdAsync(Guid id)
@@ -141,6 +155,16 @@ public class PostsService : IPostsService
 
         await _likesRepository.SaveChangesAsync();
         var updated = await BuildPostQuery().FirstAsync(p => p.Id == id);
+
+        if (updated.UserId != userId && existing is null)
+        {
+            await _notificationsService.CreateAsync(
+                userId,
+                updated.UserId,
+                "PostLiked",
+                "Bài viết của bạn vừa được thích.");
+        }
+
         return updated.ToPostResponse();
     }
 
@@ -167,6 +191,20 @@ public class PostsService : IPostsService
             .Include(c => c.User)
             .FirstAsync(c => c.Id == comment.Id);
 
+        var postOwnerId = await _postsRepository.Query()
+            .Where(p => p.Id == id)
+            .Select(p => p.UserId)
+            .FirstAsync();
+
+        if (postOwnerId != userId)
+        {
+            await _notificationsService.CreateAsync(
+                userId,
+                postOwnerId,
+                "PostCommented",
+                "Bài viết của bạn vừa có bình luận mới.");
+        }
+
         return created.ToCommentResponse();
     }
 
@@ -190,6 +228,15 @@ public class PostsService : IPostsService
 
         await _postsRepository.AddAsync(sharedPost);
         await _postsRepository.SaveChangesAsync();
+
+        if (originalPost.UserId != userId)
+        {
+            await _notificationsService.CreateAsync(
+                userId,
+                originalPost.UserId,
+                "PostShared",
+                "Bài viết của bạn vừa được chia sẻ.");
+        }
 
         var created = await BuildPostQuery().FirstAsync(p => p.Id == sharedPost.Id);
         return created.ToPostResponse();

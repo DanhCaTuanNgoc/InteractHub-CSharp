@@ -1,3 +1,4 @@
+using InteractHub.API.DTOs.Common;
 using InteractHub.API.DTOs.Request;
 using InteractHub.API.DTOs.Response;
 using InteractHub.API.Entities;
@@ -39,18 +40,27 @@ public class UsersService : IUsersService
         return user.ToUserSummary();
     }
 
-    public async Task<List<UserSummaryResponse>> SearchAsync(string keyword)
+    public async Task<PagedResult<UserSummaryResponse>> SearchAsync(string keyword, int page, int pageSize)
     {
         keyword = keyword.Trim();
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
-        return await _usersRepository.Query()
+        var query = _usersRepository.Query()
             .Where(u =>
                 u.UserName!.Contains(keyword) ||
                 u.FullName.Contains(keyword) ||
                 u.Email!.Contains(keyword))
-            .OrderBy(u => u.UserName)
-            .Take(20)
+            .OrderBy(u => u.UserName);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(u => u.ToUserSummary())
             .ToListAsync();
+
+        return PagedResult<UserSummaryResponse>.Create(items, page, pageSize, totalCount);
     }
 }

@@ -1,5 +1,5 @@
 import { axiosClient } from '../api/axiosClient'
-import type { ApiResponse } from '../types/api'
+import type { ApiResponse, PagedResult } from '../types/api'
 import type { CreatePostRequest, Post } from '../types/post'
 
 async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>): Promise<T> {
@@ -11,8 +11,12 @@ async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>): Promise<T>
 }
 
 export const postService = {
-  getFeed(): Promise<Post[]> {
-    return unwrap(axiosClient.get<ApiResponse<Post[]>>('/posts'))
+  getFeed(page: number, pageSize: number): Promise<PagedResult<Post>> {
+    return unwrap(
+      axiosClient.get<ApiResponse<PagedResult<Post>>>('/posts', {
+        params: { page, pageSize },
+      }),
+    )
   },
   create(payload: CreatePostRequest): Promise<Post> {
     return unwrap(axiosClient.post<ApiResponse<Post>>('/posts', payload))

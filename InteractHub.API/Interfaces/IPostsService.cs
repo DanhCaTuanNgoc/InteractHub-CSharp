@@ -1,3 +1,4 @@
+using InteractHub.API.DTOs.Common;
 using InteractHub.API.DTOs.Request;
 using InteractHub.API.DTOs.Response;
 
@@ -5,7 +6,7 @@ namespace InteractHub.API.Interfaces;
 
 public interface IPostsService
 {
-    Task<List<PostResponse>> GetFeedAsync();
+    Task<PagedResult<PostResponse>> GetFeedAsync(int page, int pageSize);
     Task<PostResponse?> GetByIdAsync(Guid id);
     Task<PostResponse> CreateAsync(string userId, CreatePostRequest request);
     Task<PostResponse?> UpdateAsync(Guid id, string userId, bool isAdmin, UpdatePostRequest request);
