@@ -273,29 +273,30 @@ npx tailwindcss init -p
 | `PostReport` | N-1 Post, User |
 
 **Checklist B1:**
-- [ ] Tạo tất cả entity class với Data Annotations
-- [ ] Cấu hình `AppDbContext` kế thừa `IdentityDbContext<User>`
-- [ ] Cấu hình Fluent API cho quan hệ phức tạp
-- [ ] Tạo ít nhất **3 migration files** (`InitialCreate`, `SeedRoles`, `AddIndexes`)
-- [ ] Seed data: Admin user, roles (User/Admin), sample posts
+- [x] Tạo tất cả entity class với Data Annotations
+- [x] Cấu hình `AppDbContext` kế thừa `IdentityDbContext<User>`
+- [x] Cấu hình Fluent API cho quan hệ phức tạp
+- [x] Tạo ít nhất **3 migration files** (`InitialCreate`, `SeedRoles`, `AddIndexes`)
+- [x] Seed data: Admin user, roles (User/Admin), sample posts
 - [ ] Vẽ database diagram (dùng dbdiagram.io hoặc SSMS)
+- [ ] Dọn/ghép 2 migration rỗng (`SeedRoles`, `AddIndexes`) để lịch sử migration rõ ràng hơn
 
 #### B3 — JWT Authentication & Authorization *(1.5 ngày)*
 
 > Làm B3 **trước B2** để có auth flow cho các endpoint.
 
 **Checklist B3:**
-- [ ] `AuthController` với `POST /api/auth/register` và `POST /api/auth/login`
-- [ ] JWT service tạo token (secret, issuer, audience, expiry trong `appsettings.json`)
-- [ ] `User` entity thêm fields: `FullName`, `AvatarUrl`, `Bio`, `CreatedAt`
-- [ ] Seed roles: `User`, `Admin`
-- [ ] `[Authorize]` attribute trên các protected endpoints
-- [ ] Login response trả về: `{ token, expiresIn, user: {...} }`
-- [ ] Role-based authorization với [Authorize(Roles = "Admin")]
+- [x] `AuthController` với `POST /api/auth/register` và `POST /api/auth/login`
+- [x] JWT service tạo token (secret, issuer, audience, expiry trong `appsettings.json`)
+- [x] `User` entity thêm fields: `FullName`, `AvatarUrl`, `Bio`, `CreatedAt`
+- [x] Seed roles: `User`, `Admin`
+- [x] `[Authorize]` attribute trên các protected endpoints
+- [x] Login response trả về: `{ token, expiresIn, user: {...} }`
+- [x] Role-based authorization với [Authorize(Roles = "Admin")]
 
 #### B2 — RESTful API Controllers & DTOs *(2 ngày)*
 
-**6 Controllers cần tạo (≥ 20 endpoints):**
+**8 Controllers cần tạo (≥ 20 endpoints):**
 
 | Controller | Endpoints tiêu biểu |
 |------------|---------------------|
@@ -309,40 +310,49 @@ npx tailwindcss init -p
 | `AdminController` | Manage reports, moderation |
 
 **Checklist B2:**
-- [ ] Tất cả controller dùng `[ApiController]` và `[Route("api/[controller]")]`
-- [ ] Tạo Request DTOs và Response DTOs riêng biệt
-- [ ] HTTP status codes chuẩn: `200`, `201`, `400`, `401`, `404`, `500`
-- [ ] Response format thống nhất: `{ success, data, message, errors }`
-- [ ] CORS config trong `Program.cs` cho phép React origin
-- [ ] Swagger UI hoạt động tại `/swagger`
-- [ ] Global Exception Middleware (handle 400, 401, 500)
-- [ ] Model validation với Data Annotations (Required, Email, StringLength)
-- [ ] Validate DTO trước khi xử lý
+- [x] Tất cả controller dùng `[ApiController]` và `[Route("api/[controller]")]`
+- [x] Tạo Request DTOs và Response DTOs riêng biệt
+- [x] HTTP status codes chuẩn: `200`, `201`, `400`, `401`, `404`, `500`
+- [x] Response format thống nhất: `{ success, data, message, errors }`
+- [x] CORS config trong `Program.cs` cho phép React origin
+- [x] Swagger UI hoạt động tại `/swagger`
+- [x] Global Exception Middleware (handle 400, 401, 500)
+- [x] Model validation với Data Annotations (Required, Email, StringLength)
+- [x] Validate DTO trước khi xử lý
 
 #### B4 — Business Logic & Services Layer *(1.5 ngày)*
 
-**5 Service classes cần tạo:**
+**6 Service classes cần tạo:**
 
 | Service | Trách nhiệm |
 |---------|-------------|
 | `AuthService` | Register, Login, Token generation |
 | `PostsService` | CRUD, Like, Comment logic |
 | `FriendsService` | Friend request workflow |
-| `NotificationService` | Tạo và gửi notification |
+| `NotificationsService` | Tạo và gửi notification |
 | `FileUploadService` | Upload ảnh lên Azure Blob Storage |
 | `HashtagService` | Xử lý hashtag & trending |
 
 **Checklist B4:**
-- [ ] Interface cho mỗi service (`IAuthService`, v.v.)
-- [ ] Đăng ký DI trong `Program.cs`
-- [ ] Repository pattern cho data access (BẮT BUỘC theo đề bài)
-- [ ] Business rules: không thể like bài của chính mình, không duplicate friend request, v.v.
+- [x] Interface cho mỗi service (`IAuthService`, v.v.)
+- [x] Đăng ký DI trong `Program.cs`
+- [x] Repository pattern cho data access (BẮT BUỘC theo đề bài)
+- [x] Business rules: không thể like bài của chính mình, không duplicate friend request, v.v.
 
 ---
 
 ### 🎨 Phase 2 — Frontend *(5–7 ngày)*
 
 > Covers: **F1, F2, F3, F4**
+
+**Trạng thái:** 🟡 Đang bắt đầu (31/03/2026)
+
+**Phase 2 Kickoff (Sprint 1):**
+- [ ] Dựng kiến trúc thư mục frontend theo modules (`components`, `pages`, `services`, `router`, `hooks`, `types`)
+- [ ] Thiết lập routing khung: `/`, `/login`, `/register`, `/profile/:id`, `/stories`
+- [ ] Tạo nền tảng auth state (`AuthContext`) + lưu/khôi phục token
+- [ ] Tạo Axios base client + interceptor JWT + xử lý lỗi 401 chung
+- [ ] Tạo UI shell responsive: `Navbar`, layout feed 2 cột, mobile menu
 
 #### F1 — React Components & Responsive Design *(1.5 ngày)*
 
@@ -599,7 +609,7 @@ jobs:
 |--------|----------|------|-------|
 | GET | `/api/admin/reports` | ✅ (Admin) | Danh sách report |
 | PUT | `/api/admin/reports/{id}/resolve` | ✅ (Admin) | Xử lý report |
-| DELETE | `/api/posts/{id}` | ✅ (Admin) | Xóa bài vi phạm |
+| DELETE | `/api/admin/posts/{id}` | ✅ (Admin) | Xóa bài vi phạm |
 
 ---
 
@@ -612,30 +622,31 @@ jobs:
 - [ ] Git repository khởi tạo, `.gitignore` đúng
 
 ### B1 — Database (1đ)
-- [ ] ≥ 9 entity classes
-- [ ] DbContext cấu hình đúng
-- [ ] ≥ 3 migration files
-- [ ] Seed data hoạt động
+- [x] ≥ 9 entity classes
+- [x] DbContext cấu hình đúng
+- [x] ≥ 3 migration files
+- [x] Seed data hoạt động
 - [ ] Database diagram
+- [ ] Dọn/ghép migration rỗng (`SeedRoles`, `AddIndexes`)
 
 ### B2 — API Controllers (1đ)
-- [ ] ≥ 7 controllers
-- [ ] ≥ 20 endpoints
-- [ ] DTOs cho request & response
-- [ ] CORS config
-- [ ] Swagger hoạt động
+- [x] ≥ 7 controllers
+- [x] ≥ 20 endpoints
+- [x] DTOs cho request & response
+- [x] CORS config
+- [x] Swagger hoạt động
 
 ### B3 — JWT Auth (1đ)
-- [ ] Register & Login endpoints
-- [ ] JWT token generation
-- [ ] Protected endpoints với `[Authorize]`
-- [ ] Role-based authorization (User/Admin) + Admin-only endpoints
+- [x] Register & Login endpoints
+- [x] JWT token generation
+- [x] Protected endpoints với `[Authorize]`
+- [x] Role-based authorization (User/Admin) + Admin-only endpoints
 
 ### B4 — Services (1đ)
-- [ ] ≥ 6 service classes (Auth, Posts, Friends, Notification, FileUpload, Hashtag)
-- [ ] Repository pattern implemented
-- [ ] DI đăng ký đúng
-- [ ] FileUploadService cho Azure Blob
+- [x] ≥ 6 service classes (Auth, Posts, Friends, Notifications, FileUpload, Hashtag)
+- [x] Repository pattern implemented
+- [x] DI đăng ký đúng
+- [x] FileUploadService cho Azure Blob
 
 ### F1 — Components (1đ)
 - [ ] ≥ 15 components TypeScript
