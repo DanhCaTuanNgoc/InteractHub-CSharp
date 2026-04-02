@@ -17,4 +17,7 @@ export const storyService = {
   create(payload: CreateStoryRequest): Promise<Story> {
     return unwrap(axiosClient.post<ApiResponse<Story>>('/stories', payload))
   },
+  remove(storyId: string): Promise<void> {
+    return unwrap(axiosClient.delete<ApiResponse<object>>(`/stories/${storyId}`)).then(() => undefined)
+  },
 }

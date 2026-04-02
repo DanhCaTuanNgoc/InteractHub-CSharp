@@ -42,6 +42,18 @@ export function useNotifications() {
     }
   }, [])
 
+  const markRead = useCallback(async (notificationId: string) => {
+    setError(null)
+    try {
+      await notificationService.markRead(notificationId)
+      setNotifications((current) =>
+        current.map((item) => (item.id === notificationId ? { ...item, isRead: true } : item)),
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể cập nhật thông báo.')
+    }
+  }, [])
+
   useEffect(() => {
     let mounted = true
 
@@ -79,6 +91,7 @@ export function useNotifications() {
     markingAllRead,
     error,
     reload: load,
+    markRead,
     markAllRead,
   }
 }

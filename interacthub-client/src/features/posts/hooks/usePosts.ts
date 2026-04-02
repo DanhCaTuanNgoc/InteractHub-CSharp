@@ -59,6 +59,67 @@ export function usePosts() {
     }
   }, [])
 
+  const addComment = useCallback(async (postId: string, content: string) => {
+    try {
+      const created = await postService.addComment(postId, content)
+      setPosts((current) =>
+        current.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                commentCount: post.commentCount + 1,
+                recentComments: [created, ...post.recentComments].slice(0, 3),
+              }
+            : post,
+        ),
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể thêm bình luận.')
+      throw err
+    }
+  }, [])
+
+  const sharePost = useCallback(async (postId: string) => {
+    try {
+      const shared = await postService.share(postId)
+      setPosts((current) => [shared, ...current])
+      setTotalPosts((current) => current + 1)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể chia sẻ bài viết.')
+      throw err
+    }
+  }, [])
+
+  const reportPost = useCallback(async (postId: string, reason: string) => {
+    try {
+      await postService.report(postId, reason)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể report bài viết.')
+      throw err
+    }
+  }, [])
+
+  const deletePost = useCallback(async (postId: string) => {
+    try {
+      await postService.remove(postId)
+      setPosts((current) => current.filter((post) => post.id !== postId))
+      setTotalPosts((current) => Math.max(0, current - 1))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể xóa bài viết.')
+      throw err
+    }
+  }, [])
+
+  const updatePost = useCallback(async (postId: string, content: string) => {
+    try {
+      const updated = await postService.update(postId, { content })
+      setPosts((current) => current.map((post) => (post.id === postId ? updated : post)))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể cập nhật bài viết.')
+      throw err
+    }
+  }, [])
+
   const hasPosts = useMemo(() => posts.length > 0, [posts.length])
 
   return {
@@ -74,5 +135,10 @@ export function usePosts() {
     fetchPosts,
     createPost,
     toggleLike,
+    addComment,
+    sharePost,
+    reportPost,
+    deletePost,
+    updatePost,
   }
 }

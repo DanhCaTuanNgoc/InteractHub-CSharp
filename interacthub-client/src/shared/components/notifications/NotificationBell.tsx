@@ -5,7 +5,7 @@ import { Button } from '../common/Button'
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false)
-  const { notifications, unreadCount, loading, markingAllRead, error, reload, markAllRead } = useNotifications()
+  const { notifications, unreadCount, loading, markingAllRead, error, reload, markRead, markAllRead } = useNotifications()
 
   return (
     <div className="notification-bell">
@@ -41,6 +41,11 @@ export function NotificationBell() {
               <li key={item.id} className={item.isRead ? '' : 'notification-bell__item--unread'}>
                 <p>{item.content}</p>
                 <small>{new Date(item.createdAt).toLocaleString()}</small>
+                {!item.isRead ? (
+                  <Button type="button" variant="ghost" onClick={() => void markRead(item.id)}>
+                    Đánh dấu đã đọc
+                  </Button>
+                ) : null}
               </li>
             ))}
           </ul>

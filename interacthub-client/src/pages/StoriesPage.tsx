@@ -15,6 +15,7 @@ export function StoriesPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const {
     register,
@@ -52,6 +53,20 @@ export function StoriesPage() {
       setSubmitError(err instanceof Error ? err.message : 'Không thể đăng story.')
     }
   })
+
+  const removeStory = async (storyId: string) => {
+    setDeletingId(storyId)
+    setError(null)
+
+    try {
+      await storyService.remove(storyId)
+      setStories((current) => current.filter((story) => story.id !== storyId))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể xóa story.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
@@ -92,6 +107,14 @@ export function StoriesPage() {
               <div>
                 <strong>{story.user.fullName}</strong>
                 <p>{new Date(story.createdAt).toLocaleString()}</p>
+                <Button
+                  type="button"
+                  variant="danger"
+                  busy={deletingId === story.id}
+                  onClick={() => void removeStory(story.id)}
+                >
+                  Xóa
+                </Button>
               </div>
             </article>
           ))}

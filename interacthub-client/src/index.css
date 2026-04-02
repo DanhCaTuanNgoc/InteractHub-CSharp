@@ -343,6 +343,16 @@ p {
   line-height: 1.5;
 }
 
+.post-card__inline-form {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.post-card__inline-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .post-card__image {
   width: 100%;
   border-radius: 12px;
@@ -359,6 +369,22 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.post-card__comments {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.post-card__comment-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: #fffefb;
+}
+
+.post-card__comment-item p {
+  margin-top: 0.25rem;
 }
 
 .form-control {

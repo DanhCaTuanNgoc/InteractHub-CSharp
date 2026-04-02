@@ -24,3 +24,8 @@ export type CreatePostRequest = {
   content: string
   imageUrl?: string
 }
+
+export type UpdatePostRequest = {
+  content: string
+  imageUrl?: string
+}
