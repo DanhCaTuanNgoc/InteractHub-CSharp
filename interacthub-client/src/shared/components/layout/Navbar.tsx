@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clapperboard, Compass, House, Menu, UserRound, X } from 'lucide-react'
+import { Clapperboard, Compass, House, Menu, Shield, UserRound, UserRoundPlus, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../../../features/auth/hooks/useAuth'
 import { ROUTES } from '../../constants/routes'
@@ -9,12 +9,16 @@ import { NotificationBell } from '../notifications/NotificationBell'
 const navItems = [
   { to: ROUTES.home, label: 'Home', icon: House },
   { to: ROUTES.explore, label: 'Explore', icon: Compass },
+  { to: ROUTES.friendRequests, label: 'Friend Requests', icon: UserRoundPlus },
   { to: ROUTES.stories, label: 'Stories', icon: Clapperboard },
+  { to: ROUTES.admin, label: 'Admin', icon: Shield },
 ]
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const { user, logout, hasRole } = useAuth()
+
+  const visibleNavItems = navItems.filter((item) => item.to !== ROUTES.admin || hasRole('Admin'))
 
   return (
     <header className="navbar relative">
@@ -40,7 +44,7 @@ export function Navbar() {
           className={open ? 'navbar__links navbar__links--open w-full md:w-auto' : 'navbar__links w-full md:w-auto'}
           aria-label="Main navigation"
         >
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

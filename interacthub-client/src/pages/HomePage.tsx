@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Newspaper, Rocket } from 'lucide-react'
+import { Newspaper } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { usePosts } from '../features/posts/hooks/usePosts'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'

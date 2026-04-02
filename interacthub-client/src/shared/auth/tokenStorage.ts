@@ -5,6 +5,7 @@ export type AuthUser = {
   id: string
   username: string
   fullName: string
+  roles: string[]
 }
 
 export function getAccessToken(): string | null {
@@ -26,7 +27,20 @@ export function getStoredUser(): AuthUser | null {
   }
 
   try {
-    return JSON.parse(rawValue) as AuthUser
+    const parsed = JSON.parse(rawValue) as Partial<AuthUser>
+    if (!parsed || typeof parsed !== 'object') {
+      localStorage.removeItem(AUTH_USER_KEY)
+      return null
+    }
+
+    return {
+      id: typeof parsed.id === 'string' ? parsed.id : '',
+      username: typeof parsed.username === 'string' ? parsed.username : '',
+      fullName: typeof parsed.fullName === 'string' ? parsed.fullName : '',
+      roles: Array.isArray(parsed.roles)
+        ? parsed.roles.filter((value): value is string => typeof value === 'string')
+        : [],
+    }
   } catch {
     localStorage.removeItem(AUTH_USER_KEY)
     return null
@@ -44,4 +58,40 @@ export function clearStoredUser(): void {
 export function clearAuthStorage(): void {
   clearAccessToken()
   clearStoredUser()
+}
+
+export function extractRolesFromToken(token: string): string[] {
+  try {
+    const payload = token.split('.')[1]
+    if (!payload) {
+      return []
+    }
+
+    const normalizedBase64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const decodedPayload = atob(normalizedBase64)
+    const claims = JSON.parse(decodedPayload) as Record<string, unknown>
+
+    const roleClaimKeys = [
+      'role',
+      'roles',
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
+    ]
+
+    const roles = roleClaimKeys.flatMap((key) => {
+      const claimValue = claims[key]
+      if (typeof claimValue === 'string') {
+        return [claimValue]
+      }
+
+      if (Array.isArray(claimValue)) {
+        return claimValue.filter((value): value is string => typeof value === 'string')
+      }
+
+      return []
+    })
+
+    return Array.from(new Set(roles))
+  } catch {
+    return []
+  }
 }

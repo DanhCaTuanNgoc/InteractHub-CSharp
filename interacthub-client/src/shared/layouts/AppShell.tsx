@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom'
-import { Bot, LayoutDashboard, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import { Navbar } from '../components/layout/Navbar'
 
 export function AppShell() {

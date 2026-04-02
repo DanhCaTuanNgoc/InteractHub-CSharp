@@ -35,6 +35,7 @@ export function RegisterPage() {
       minLength: { value: 8, message: 'Mật khẩu tối thiểu 8 ký tự.' },
       validate: {
         upper: (value: string) => /[A-Z]/.test(value) || 'Mật khẩu cần 1 chữ in hoa.',
+        lower: (value: string) => /[a-z]/.test(value) || 'Mật khẩu cần 1 chữ thường.',
         number: (value: string) => /\d/.test(value) || 'Mật khẩu cần 1 chữ số.',
       },
     }),
