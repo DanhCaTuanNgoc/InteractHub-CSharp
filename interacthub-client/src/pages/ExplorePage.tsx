@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Search, UsersRound } from 'lucide-react'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
 import { Pagination } from '../shared/components/common/Pagination'
 import { TextInput } from '../shared/components/common/TextInput'
@@ -51,12 +52,19 @@ export function ExplorePage() {
   }, [debouncedQuery])
 
   return (
-    <section className="cards-section cards-section--single">
-      <article className="status-card">
-        <h1>Explore</h1>
+    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card p-4 sm:p-5 lg:p-6">
+        <h1 className="title-with-icon">
+          <UsersRound size={20} aria-hidden="true" />
+          <span>Explore</span>
+        </h1>
         <p>Tìm người dùng bằng debounce 300ms trước khi gọi API.</p>
 
         <div className="explore-search">
+          <div className="field-hint">
+            <Search size={14} aria-hidden="true" />
+            <span>Tìm theo username, họ tên hoặc email</span>
+          </div>
           <TextInput
             label="Search user"
             placeholder="Nhập username, họ tên hoặc email"

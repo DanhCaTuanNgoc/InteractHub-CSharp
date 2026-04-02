@@ -345,57 +345,57 @@ npx tailwindcss init -p
 
 > Covers: **F1, F2, F3, F4**
 
-**Trạng thái:** 🟡 Đang bắt đầu (31/03/2026)
+**Trạng thái:** 🟢 Đang triển khai tốt (cập nhật thực tế 02/04/2026)
 
 **Phase 2 Kickoff (Sprint 1):**
-- [ ] Dựng kiến trúc thư mục frontend theo modules (`components`, `pages`, `services`, `router`, `hooks`, `types`)
-- [ ] Thiết lập routing khung: `/`, `/login`, `/register`, `/profile/:id`, `/stories`
-- [ ] Tạo nền tảng auth state (`AuthContext`) + lưu/khôi phục token
-- [ ] Tạo Axios base client + interceptor JWT + xử lý lỗi 401 chung
-- [ ] Tạo UI shell responsive: `Navbar`, layout feed 2 cột, mobile menu
+- [x] Dựng kiến trúc thư mục frontend theo modules (`components`, `pages`, `services`, `router`, `hooks`, `types`)
+- [x] Thiết lập routing khung: `/`, `/login`, `/register`, `/profile/:id`, `/stories`
+- [x] Tạo nền tảng auth state (`AuthContext`) + lưu/khôi phục token
+- [x] Tạo Axios base client + interceptor JWT + xử lý lỗi 401 chung
+- [x] Tạo UI shell responsive: `Navbar`, layout feed 2 cột, mobile menu
 
 #### F1 — React Components & Responsive Design *(1.5 ngày)*
 
 **Checklist F1:**
-- [ ] ≥ 15 React components với TypeScript interfaces đầy đủ
-- [ ] Tailwind CSS responsive (mobile-first: `sm:`, `md:`, `lg:`)
-- [ ] Responsive Navbar (hamburger menu trên mobile)
-- [ ] Custom hooks: `useAuth`, `usePosts`, `useDebounce`, `useLocalStorage`
-- [ ] Viết component hierarchy documentation (dạng tree)
-- [ ] Chụp screenshot trên 3 kích thước: mobile / tablet / desktop
+- [x] ≥ 15 React components với TypeScript interfaces đầy đủ
+- [x] Tailwind CSS responsive (mobile-first: `sm:`, `md:`, `lg:`)
+- [x] Responsive Navbar (hamburger menu trên mobile)
+- [x] Custom hooks: `useAuth`, `usePosts`, `useDebounce`, `useLocalStorage`
+- [x] Viết component hierarchy documentation (dạng tree)
+- [ ] Chụp screenshot trên 3 kích thước: mobile / tablet / desktop (Tự chụp thủ công)
 
 #### F2 — State Management & API Integration *(1.5 ngày)*
 
 **Checklist F2:**
-- [ ] `AuthContext` (hoặc Redux slice) lưu: `user`, `token`, `isAuthenticated`
-- [ ] Axios instance với `baseURL` và interceptor tự gắn `Authorization: Bearer <token>`
-- [ ] Token lưu trong `localStorage`, tự load khi khởi động app
-- [ ] API service files riêng: `authService.ts`, `postService.ts`, v.v.
-- [ ] TypeScript interfaces cho tất cả API response
-- [ ] Loading states và error handling ở mỗi component
+- [x] `AuthContext` (hoặc Redux slice) lưu: `user`, `token`, `isAuthenticated`
+- [x] Axios instance với `baseURL` và interceptor tự gắn `Authorization: Bearer <token>`
+- [x] Token lưu trong `localStorage`, tự load khi khởi động app
+- [x] API service files riêng: `authService.ts`, `postService.ts`, v.v.
+- [x] TypeScript interfaces cho tất cả API response
+- [x] Loading states và error handling ở mỗi component
 
 #### F3 — Forms & Validation *(1.5 ngày)*
 
 **Checklist F3:**
-- [ ] **Register form:** username, email, password, confirm password
-- [ ] **Login form:** email, password, error message rõ ràng
-- [ ] **Post creation form:** text content + image upload với preview
-- [ ] **Profile update form:** fullName, bio, avatar
-- [ ] React Hook Form cho tất cả forms
-- [ ] Password strength indicator (Weak / Medium / Strong)
-- [ ] Reusable `<TextInput />`, `<FileInput />` với TypeScript props
-- [ ] Loading spinner khi đang submit
+- [x] **Register form:** username, email, password, confirm password
+- [x] **Login form:** email, password, error message rõ ràng
+- [x] **Post creation form:** text content + image upload với preview
+- [x] **Profile update form:** fullName, bio, avatar
+- [x] React Hook Form cho tất cả forms
+- [x] Password strength indicator (Weak / Medium / Strong)
+- [x] Reusable `<TextInput />`, `<FileInput />` với TypeScript props
+- [x] Loading spinner khi đang submit
 
 #### F4 — Routing, Protected Routes & Dynamic Features *(2 ngày)*
 
 **Checklist F4:**
-- [ ] React Router v6 với nested routes
-- [ ] `<ProtectedRoute>` component — redirect về `/login` nếu chưa auth
-- [ ] Search với `useDebounce` (debounce 300ms trước khi gọi API)
-- [ ] Infinite scroll **hoặc** pagination cho feed
-- [ ] `React.lazy()` + `<Suspense>` cho route-level code splitting
-- [ ] Loading skeletons cho PostCard, UserCard
-- [ ] SignalR client kết nối để nhận notification real-time
+- [x] React Router v6 với nested routes
+- [x] `<ProtectedRoute>` component — redirect về `/login` nếu chưa auth
+- [x] Search với `useDebounce` (debounce 300ms trước khi gọi API)
+- [x] Infinite scroll **hoặc** pagination cho feed
+- [x] `React.lazy()` + `<Suspense>` cho route-level code splitting
+- [x] Loading skeletons cho PostCard, UserCard
+- [x] SignalR client kết nối để nhận notification real-time
 
 ---
 
@@ -404,14 +404,14 @@ npx tailwindcss init -p
 > Covers: **T1** — Cần ít nhất **15 unit test methods**
 
 **Checklist T1:**
-- [ ] Test project dùng xUnit + Moq
-- [ ] Tests cho **AuthService**: register thành công, email trùng, sai password
-- [ ] Tests cho **PostsService**: tạo post, xóa post của người khác (lỗi), like/unlike
-- [ ] Tests cho **FriendsService**: gửi request, chấp nhận, từ chối, request trùng
-- [ ] Mock `AppDbContext` hoặc dùng In-Memory Database
-- [ ] Test cả positive cases và negative/edge cases
-- [ ] Chạy `dotnet test --collect:"XPlat Code Coverage"` → xuất coverage report
-- [ ] Coverage ≥ 60% cho service layer
+- [x] Test project dùng xUnit + Moq
+- [x] Tests cho **AuthService**: register thành công, email trùng, sai password
+- [x] Tests cho **PostsService**: tạo post, xóa post của người khác (lỗi), like/unlike
+- [x] Tests cho **FriendsService**: gửi request, chấp nhận, từ chối, request trùng
+- [x] Mock `AppDbContext` bằng In-Memory Database
+- [x] Test cả positive cases và negative/edge cases
+- [x] Chạy `dotnet test --collect:"XPlat Code Coverage"` → xuất coverage report
+- [x] Coverage ≥ 60% cho service layer (**71.77%** cho AuthService + PostsService + FriendsService)
 
 ```bash
 # Chạy test và xem coverage
@@ -616,10 +616,10 @@ jobs:
 ## 9. Checklist hoàn thành
 
 ### Phase 0 — Setup
-- [ ] Solution và projects tạo xong
+- [x] Solution và projects tạo xong
 - [ ] Tất cả NuGet packages đã cài
 - [ ] React app với Tailwind chạy được
-- [ ] Git repository khởi tạo, `.gitignore` đúng
+- [x] Git repository khởi tạo, `.gitignore` đúng
 
 ### B1 — Database (1đ)
 - [x] ≥ 9 entity classes
@@ -649,32 +649,32 @@ jobs:
 - [x] FileUploadService cho Azure Blob
 
 ### F1 — Components (1đ)
-- [ ] ≥ 15 components TypeScript
-- [ ] Tailwind responsive
-- [ ] Custom hooks
-- [ ] Component hierarchy doc
+- [x] ≥ 15 components TypeScript
+- [x] Tailwind responsive
+- [x] Custom hooks
+- [x] Component hierarchy doc
 
 ### F2 — State & API (1đ)
-- [ ] AuthContext / Redux store
-- [ ] Axios với interceptor
-- [ ] TypeScript interfaces cho API
+- [x] AuthContext / Redux store
+- [x] Axios với interceptor
+- [x] TypeScript interfaces cho API
 
 ### F3 — Forms (1đ)
-- [ ] React Hook Form cho tất cả forms
-- [ ] Validation đầy đủ
-- [ ] Image upload + preview
+- [x] React Hook Form cho tất cả forms
+- [x] Validation đầy đủ
+- [x] Image upload + preview
 
 ### F4 — Routing (1đ)
-- [ ] Protected routes
-- [ ] Search với debounce
-- [ ] Lazy loading
-- [ ] SignalR client
+- [x] Protected routes
+- [x] Search với debounce
+- [x] Lazy loading
+- [x] SignalR client
 
 ### T1 — Tests (1đ)
-- [ ] ≥ 15 test methods
-- [ ] 3 service classes được test
-- [ ] Coverage ≥ 60%
-- [ ] Cả positive và negative cases
+- [x] ≥ 15 test methods (hiện có 19)
+- [x] 3 service classes được test (Auth, Posts, Friends)
+- [x] Coverage ≥ 60% cho service layer
+- [x] Cả positive và negative cases
 
 ### D1 — Deployment (1đ)
 - [ ] App live trên Azure URL

@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 :root {
   --bg: #f6f2e8;
   --surface: #fffdf8;
@@ -95,6 +97,9 @@ p {
 }
 
 .navbar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
   color: var(--text-muted);
@@ -115,9 +120,19 @@ p {
 
 .navbar__menu-btn {
   display: none;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.4rem 0.65rem;
+  background: var(--surface-alt);
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   border: none;
   border-radius: 10px;
   padding: 0.6rem 1rem;
@@ -174,6 +189,9 @@ p {
 
 .shell__sidebar-card h3 {
   font-family: var(--font-title);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.4rem;
 }
 
@@ -184,9 +202,16 @@ p {
 
 .shell__sidebar-card ul {
   margin: 0;
-  padding-left: 1rem;
+  padding: 0;
+  list-style: none;
   color: var(--text-muted);
   display: grid;
+  gap: 0.45rem;
+}
+
+.shell__sidebar-card li {
+  display: flex;
+  align-items: center;
   gap: 0.45rem;
 }
 
@@ -202,9 +227,13 @@ p {
   border: 1px solid var(--line);
   border-radius: 26px;
   box-shadow: var(--shadow);
+  animation: reveal-up 0.5s ease both;
 }
 
 .hero-section__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   text-transform: uppercase;
   font-size: 0.76rem;
   font-weight: 700;
@@ -249,6 +278,12 @@ p {
 .status-card h2 {
   font-family: var(--font-title);
   margin-bottom: 0.6rem;
+}
+
+.title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .status-card p {
@@ -298,6 +333,12 @@ p {
   font-size: 0.88rem;
 }
 
+.post-card__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .post-card__content {
   line-height: 1.5;
 }
@@ -312,6 +353,12 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.post-card__comment-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .form-control {
@@ -444,6 +491,9 @@ p {
 }
 
 .notification-bell__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0.45rem 0.75rem;
@@ -503,6 +553,15 @@ p {
   margin-top: 1rem;
 }
 
+.field-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
 .explore-result {
   margin-top: 0.8rem;
   display: grid;
@@ -514,6 +573,17 @@ p {
   border-radius: 12px;
   padding: 0.8rem;
   background: rgba(255, 253, 248, 0.8);
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .user-card__header {

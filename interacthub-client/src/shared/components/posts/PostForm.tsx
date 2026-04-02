@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { PenSquare, SendHorizontal } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { uploadService } from '../../services/uploadService'
 import { Button } from '../common/Button'
@@ -18,6 +19,7 @@ type PostFormProps = {
 export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const {
     register,
     watch,
@@ -44,23 +46,30 @@ export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
     setSubmitError(null)
     let imageUrl: string | undefined
 
-    if (values.image?.[0]) {
-      const uploaded = await uploadService.uploadImage(values.image[0])
-      imageUrl = uploaded.url
-    }
-
     try {
+      setUploading(true)
+
+      if (values.image?.[0]) {
+        const uploaded = await uploadService.uploadImage(values.image[0])
+        imageUrl = uploaded.url
+      }
+
       await onSubmitPost(values.content, imageUrl)
       reset()
       setPreviewUrl(null)
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Tạo bài viết thất bại.')
+    } finally {
+      setUploading(false)
     }
   })
 
   return (
     <form className="post-form" onSubmit={submit}>
-      <h2>Tạo bài viết</h2>
+      <h2 className="title-with-icon">
+        <PenSquare size={18} aria-hidden="true" />
+        <span>Tạo bài viết</span>
+      </h2>
 
       <TextInput
         label="Nội dung"
@@ -83,7 +92,8 @@ export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
 
       {submitError ? <p className="form-error">{submitError}</p> : null}
 
-      <Button type="submit" busy={busy}>
+      <Button type="submit" busy={busy || uploading}>
+        <SendHorizontal size={15} aria-hidden="true" />
         Đăng bài
       </Button>
     </form>

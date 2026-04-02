@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Clapperboard, Compass, House, Menu, UserRound, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../../../features/auth/hooks/useAuth'
 import { ROUTES } from '../../constants/routes'
@@ -6,9 +7,9 @@ import { Button } from '../common/Button'
 import { NotificationBell } from '../notifications/NotificationBell'
 
 const navItems = [
-  { to: ROUTES.home, label: 'Home' },
-  { to: ROUTES.explore, label: 'Explore' },
-  { to: ROUTES.stories, label: 'Stories' },
+  { to: ROUTES.home, label: 'Home', icon: House },
+  { to: ROUTES.explore, label: 'Explore', icon: Compass },
+  { to: ROUTES.stories, label: 'Stories', icon: Clapperboard },
 ]
 
 export function Navbar() {
@@ -16,18 +17,29 @@ export function Navbar() {
   const { user, logout } = useAuth()
 
   return (
-    <header className="navbar">
-      <div className="navbar__inner">
-        <Link to={ROUTES.home} className="navbar__brand" aria-label="InteractHub home">
+    <header className="navbar relative">
+      <div className="navbar__inner flex-wrap gap-3 md:flex-nowrap md:gap-4">
+        <Link to={ROUTES.home} className="navbar__brand text-sm sm:text-base" aria-label="InteractHub home">
           <span className="navbar__dot" />
           InteractHub
         </Link>
 
-        <button type="button" className="navbar__menu-btn" onClick={() => setOpen((current) => !current)}>
-          Menu
+        <button
+          type="button"
+          className="navbar__menu-btn ml-auto md:hidden"
+          onClick={() => setOpen((current) => !current)}
+          aria-expanded={open}
+          aria-controls="primary-nav"
+        >
+          {open ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
+          <span>Menu</span>
         </button>
 
-        <nav className={open ? 'navbar__links navbar__links--open' : 'navbar__links'} aria-label="Main navigation">
+        <nav
+          id="primary-nav"
+          className={open ? 'navbar__links navbar__links--open w-full md:w-auto' : 'navbar__links w-full md:w-auto'}
+          aria-label="Main navigation"
+        >
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -38,6 +50,7 @@ export function Navbar() {
                 isActive ? 'navbar__link navbar__link--active' : 'navbar__link'
               }
             >
+              <item.icon size={16} aria-hidden="true" />
               {item.label}
             </NavLink>
           ))}
@@ -48,11 +61,12 @@ export function Navbar() {
               isActive ? 'navbar__link navbar__link--active' : 'navbar__link'
             }
           >
+            <UserRound size={16} aria-hidden="true" />
             Profile
           </NavLink>
         </nav>
 
-        <div className="navbar__actions">
+        <div className="navbar__actions w-full justify-end md:ml-auto md:w-auto">
           <NotificationBell />
           <Button type="button" variant="ghost" onClick={logout}>
             Logout

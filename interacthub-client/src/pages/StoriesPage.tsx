@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Clapperboard, ImagePlus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Button } from '../shared/components/common/Button'
 import { TextInput } from '../shared/components/common/TextInput'
@@ -13,6 +14,7 @@ export function StoriesPage() {
   const [stories, setStories] = useState<Story[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
     register,
@@ -40,15 +42,24 @@ export function StoriesPage() {
   }, [])
 
   const onSubmit = handleSubmit(async (values) => {
-    const created = await storyService.create(values)
-    setStories((current) => [created, ...current])
-    reset()
+    setSubmitError(null)
+
+    try {
+      const created = await storyService.create(values)
+      setStories((current) => [created, ...current])
+      reset()
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Không thể đăng story.')
+    }
   })
 
   return (
-    <section className="cards-section cards-section--single">
-      <article className="status-card">
-        <h1>Stories</h1>
+    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card p-4 sm:p-5 lg:p-6">
+        <h1 className="title-with-icon">
+          <Clapperboard size={20} aria-hidden="true" />
+          <span>Stories</span>
+        </h1>
         <p>Tạo story mới và xem danh sách đang hoạt động.</p>
 
         <form className="auth-form" onSubmit={onSubmit}>
@@ -65,16 +76,18 @@ export function StoriesPage() {
             })}
           />
           <Button type="submit" busy={isSubmitting}>
+            <ImagePlus size={15} aria-hidden="true" />
             Đăng story
           </Button>
         </form>
 
         {error ? <p className="form-error">{error}</p> : null}
+        {submitError ? <p className="form-error">{submitError}</p> : null}
         {loading ? <p>Đang tải stories...</p> : null}
 
-        <div className="story-grid">
+        <div className="story-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {stories.map((story) => (
-            <article key={story.id} className="story-card">
+            <article key={story.id} className="story-card overflow-hidden rounded-xl">
               <img src={story.mediaUrl} alt="Story media" />
               <div>
                 <strong>{story.user.fullName}</strong>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Save, UserRoundPen } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 import { Button } from '../shared/components/common/Button'
@@ -21,6 +22,7 @@ export function ProfilePage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [profile, setProfile] = useState<UserSummary | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
@@ -78,20 +80,25 @@ export function ProfilePage() {
       return
     }
 
+    setSubmitError(null)
     let avatarUrl = profile?.avatarUrl ?? undefined
 
-    if (values.avatar?.[0]) {
-      const uploaded = await uploadService.uploadImage(values.avatar[0])
-      avatarUrl = uploaded.url
+    try {
+      if (values.avatar?.[0]) {
+        const uploaded = await uploadService.uploadImage(values.avatar[0])
+        avatarUrl = uploaded.url
+      }
+
+      const updated = await userService.updateProfile(profileId, {
+        fullName: values.fullName,
+        bio: values.bio,
+        avatarUrl,
+      })
+
+      setProfile(updated)
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Không thể cập nhật hồ sơ.')
     }
-
-    const updated = await userService.updateProfile(profileId, {
-      fullName: values.fullName,
-      bio: values.bio,
-      avatarUrl,
-    })
-
-    setProfile(updated)
   })
 
   if (loading) {
@@ -103,9 +110,12 @@ export function ProfilePage() {
   }
 
   return (
-    <section className="cards-section cards-section--single">
-      <article className="status-card profile-card">
-        <h1>Profile</h1>
+    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card profile-card p-4 sm:p-5 lg:p-6">
+        <h1 className="title-with-icon">
+          <UserRoundPen size={20} aria-hidden="true" />
+          <span>Profile</span>
+        </h1>
         <p>Cập nhật thông tin cá nhân theo thời gian thực.</p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
@@ -128,7 +138,10 @@ export function ProfilePage() {
 
           <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
 
+          {submitError ? <p className="form-error">{submitError}</p> : null}
+
           <Button type="submit" busy={isSubmitting}>
+            <Save size={15} aria-hidden="true" />
             Lưu thay đổi
           </Button>
         </form>

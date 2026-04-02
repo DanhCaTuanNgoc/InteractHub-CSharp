@@ -72,8 +72,8 @@ export function RegisterPage() {
   })
 
   return (
-    <main className="auth-layout">
-      <section className="auth-card">
+    <main className="auth-layout px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="auth-card w-full max-w-xl p-5 sm:p-7 lg:p-8">
         <p className="hero-section__eyebrow">Create account</p>
         <h1>Join InteractHub</h1>
         <p>Bạn chỉ mất một phút để bắt đầu chia sẻ.</p>
