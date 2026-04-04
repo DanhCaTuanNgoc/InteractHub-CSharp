@@ -11,9 +11,20 @@ public class FileUploadService : IFileUploadService
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "image/jpeg",
+        "image/jpg",
+        "image/pjpeg",
         "image/png",
         "image/webp",
         "image/gif"
+    };
+
+    private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+        ".gif"
     };
 
     private const long MaxFileSizeBytes = 5 * 1024 * 1024;
@@ -53,14 +64,17 @@ public class FileUploadService : IFileUploadService
             throw new InvalidOperationException("File size exceeds the 5MB limit.");
         }
 
-        if (!AllowedContentTypes.Contains(file.ContentType))
+        var extension = Path.GetExtension(file.FileName);
+        var hasAllowedContentType = AllowedContentTypes.Contains(file.ContentType);
+        var hasAllowedExtension = !string.IsNullOrWhiteSpace(extension) && AllowedExtensions.Contains(extension);
+
+        if (!hasAllowedContentType && !hasAllowedExtension)
         {
             throw new InvalidOperationException("Unsupported file type. Allowed types: jpeg, png, webp, gif.");
         }
 
         await _containerClient.CreateIfNotExistsAsync(PublicAccessType.None, cancellationToken: cancellationToken);
 
-        var extension = Path.GetExtension(file.FileName);
         var safeExtension = string.IsNullOrWhiteSpace(extension) ? ".bin" : extension.ToLowerInvariant();
         var blobName = $"{_baseFolder.Trim('/')}/{DateTime.UtcNow:yyyy/MM}/{userId}/{Guid.NewGuid():N}{safeExtension}";
 

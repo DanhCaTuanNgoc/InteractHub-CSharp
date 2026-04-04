@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Search, Sparkles, UsersRound } from 'lucide-react'
+import { Search, UsersRound } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { Button } from '../shared/components/common/Button'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
@@ -98,47 +98,24 @@ export function ExplorePage() {
   }
 
   return (
-    <section className="explore-page mt-2 sm:mt-4">
-      <header className="status-card explore-hero">
-        <div className="explore-hero__intro">
-          <p className="explore-hero__eyebrow">
-            <Sparkles size={14} aria-hidden="true" />
-            Khám phá cộng đồng
-          </p>
-          <p className="explore-hero__subtitle">Kết nối nhanh với bạn mới theo tên, username hoặc email.</p>
-        </div>
-
-        <div className="explore-hero__stats" aria-hidden="true">
-          <article>
-            <strong>{friends.length}</strong>
-            <span>Bạn bè</span>
-          </article>
-          <article>
-            <strong>{users.length}</strong>
-            <span>Kết quả hiện tại</span>
-          </article>
-        </div>
-
-        <div className="explore-search explore-search--hero">
+    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card p-4 sm:p-5 lg:p-6">
+        <h1 className="title-with-icon">
+          <UsersRound size={20} aria-hidden="true" />
+          <span>Khám phá cộng đồng</span>
+        </h1>
+        <div className="explore-search">
           <div className="field-hint">
             <Search size={14} aria-hidden="true" />
-            <span>Tìm theo username, họ tên hoặc email để mở rộng mạng lưới</span>
+            <span>Tìm theo username, họ tên hoặc email</span>
           </div>
           <TextInput
-            label="Search user"
+            label=""
             placeholder="Nhập username, họ tên hoặc email"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
-      </header>
-
-      <div className="explore-layout">
-        <article className="status-card explore-feed">
-          <div className="explore-feed__header">
-            <h2>Kết quả gợi ý</h2>
-            <p>{debouncedQuery.trim() ? `Từ khóa: "${debouncedQuery}"` : 'Nhập từ khóa để bắt đầu tìm kiếm.'}</p>
-          </div>
 
         {error ? <p className="form-error">{error}</p> : null}
 
@@ -149,59 +126,48 @@ export function ExplorePage() {
           </div>
         ) : (
           <div className="explore-result">
-            {!debouncedQuery.trim() ? (
-              <p className="explore-empty">Bắt đầu bằng một từ khóa để hiển thị những hồ sơ phù hợp.</p>
-            ) : users.length === 0 ? (
-              <p className="explore-empty">Chưa tìm thấy người dùng phù hợp. Hãy thử từ khóa khác.</p>
-            ) : (
-              users.map((user) => (
-                <UserCard
-                  key={user.id}
-                  user={user}
-                  action={
-                    user.id !== currentUser?.id ? (
-                      isFriend(user.id) ? (
-                        <Button
-                          type="button"
-                          variant="danger"
-                          busy={friendActionBusyId === user.id}
-                          onClick={() => void removeFriend(user.id)}
-                        >
-                          Hủy kết bạn
-                        </Button>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          busy={friendActionBusyId === user.id}
-                          onClick={() => void sendRequest(user.id)}
-                        >
-                          Kết bạn
-                        </Button>
-                      )
-                    ) : null
-                  }
-                />
-              ))
-            )}
+            {users.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+                action={
+                  user.id !== currentUser?.id ? (
+                    isFriend(user.id) ? (
+                      <Button
+                        type="button"
+                        variant="danger"
+                        busy={friendActionBusyId === user.id}
+                        onClick={() => void removeFriend(user.id)}
+                      >
+                        Hủy kết bạn
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        busy={friendActionBusyId === user.id}
+                        onClick={() => void sendRequest(user.id)}
+                      >
+                        Kết bạn
+                      </Button>
+                    )
+                  ) : null
+                }
+              />
+            ))}
           </div>
         )}
 
-        {!loading && debouncedQuery.trim() ? (
-          <div className="explore-feed__pagination">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} />
-          </div>
-        ) : null}
-        </article>
+        {friends.length > 0 ? (
+          <section className="explore-friends mt-4">
+            <div className="explore-friends__header">
+              <h2>Bạn bè hiện tại</h2>
+              <span>{friends.length} người bạn</span>
+            </div>
 
-        <aside className="status-card explore-sidebar">
-          <div className="explore-feed__header">
-            <h2>Bạn bè hiện tại</h2>
-            <p>Danh sách kết nối của bạn.</p>
-          </div>
+            <p className="explore-friends__hint">Danh sách kết nối của bạn, ưu tiên những người tương tác gần đây.</p>
 
-          {friends.length > 0 ? (
-            <div className="explore-result">
+            <div className="explore-friends__list">
               {friends.map((friend) => (
                 <UserCard
                   key={friend.id}
@@ -219,16 +185,11 @@ export function ExplorePage() {
                 />
               ))}
             </div>
-          ) : (
-            <p className="explore-empty">Bạn chưa có bạn bè nào. Hãy gửi lời mời từ danh sách Explore.</p>
-          )}
+          </section>
+        ) : null}
 
-          <div className="explore-sidebar__tip">
-            <h3>Mẹo kết nối</h3>
-            <p>Ưu tiên kết bạn với người có cùng sở thích để feed của bạn đa dạng và liên quan hơn.</p>
-          </div>
-        </aside>
-      </div>
+        {!loading ? <Pagination currentPage={currentPage} totalPages={totalPages} onChange={setCurrentPage} /> : null}
+      </article>
     </section>
   )
 }

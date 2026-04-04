@@ -11,7 +11,7 @@ export function NotificationBell() {
     <div className="notification-bell">
       <button type="button" className="notification-bell__trigger" onClick={() => setOpen((current) => !current)}>
         <Bell size={15} aria-hidden="true" />
-        <span>Notifications</span>
+        <span>Thông báo</span>
         {unreadCount > 0 ? <span className="notification-bell__badge">{unreadCount}</span> : null}
       </button>
 

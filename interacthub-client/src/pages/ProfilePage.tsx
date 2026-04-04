@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Clapperboard, Newspaper, Save, UserRoundPen } from 'lucide-react'
+import { AtSign, Clapperboard, Mail, Newspaper, Save, UserRoundPen } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
+import { Avatar } from '../shared/components/common/Avatar'
 import { Button } from '../shared/components/common/Button'
 import { FileInput } from '../shared/components/common/FileInput'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
+import { PostCard } from '../shared/components/posts/PostCard'
 import { TextInput } from '../shared/components/common/TextInput'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { postService } from '../shared/services/postService'
@@ -32,6 +34,7 @@ export function ProfilePage() {
   const [userPosts, setUserPosts] = useState<Post[]>([])
   const [userStories, setUserStories] = useState<Story[]>([])
   const [activityLoading, setActivityLoading] = useState(false)
+  const [activityError, setActivityError] = useState<string | null>(null)
 
   const profileId = useMemo(() => (id === 'me' ? user?.id : id), [id, user?.id])
   const isOwnProfile = useMemo(() => profileId === user?.id, [profileId, user?.id])
@@ -90,14 +93,16 @@ export function ProfilePage() {
 
     const loadActivity = async () => {
       setActivityLoading(true)
+      setActivityError(null)
 
       try {
         const [feed, stories] = await Promise.all([postService.getFeed(1, 50), storyService.getAll()])
         setUserPosts(feed.items.filter((item) => item.user.id === profileId))
         setUserStories(stories.filter((item) => item.user.id === profileId))
-      } catch {
+      } catch (err) {
         setUserPosts([])
         setUserStories([])
+        setActivityError(err instanceof Error ? err.message : 'Không thể tải hoạt động của người dùng.')
       } finally {
         setActivityLoading(false)
       }
@@ -131,20 +136,131 @@ export function ProfilePage() {
       setSubmitError(err instanceof Error ? err.message : 'Không thể cập nhật hồ sơ.')
     }
   })
+
+  const toggleLike = async (postId: string) => {
+    try {
+      const updated = await postService.toggleLike(postId)
+      setUserPosts((current) => current.map((post) => (post.id === postId ? updated : post)))
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'Không thể cập nhật lượt thích.')
+    }
+  }
+
+  const addComment = async (postId: string, content: string) => {
+    try {
+      const created = await postService.addComment(postId, content)
+      setUserPosts((current) =>
+        current.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                commentCount: post.commentCount + 1,
+                recentComments: [created, ...post.recentComments].slice(0, 3),
+              }
+            : post,
+        ),
+      )
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'Không thể thêm bình luận.')
+      throw err
+    }
+  }
+
+  const sharePost = async (postId: string) => {
+    try {
+      const shared = await postService.share(postId)
+      if (shared.user.id === profileId) {
+        setUserPosts((current) => [shared, ...current])
+      }
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'Không thể chia sẻ bài viết.')
+      throw err
+    }
+  }
+
+  const reportPost = async (postId: string, reason: string) => {
+    try {
+      await postService.report(postId, reason)
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'Không thể report bài viết.')
+      throw err
+    }
+  }
+
+  const deletePost = async (postId: string) => {
+    try {
+      await postService.remove(postId)
+      setUserPosts((current) => current.filter((post) => post.id !== postId))
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'Không thể xóa bài viết.')
+      throw err
+    }
+  }
+
+  const updatePost = async (postId: string, content: string) => {
+    try {
+      const updated = await postService.update(postId, { content })
+      setUserPosts((current) => current.map((post) => (post.id === postId ? updated : post)))
+    } catch (err) {
+      setActivityError(err instanceof Error ? err.message : 'Không thể cập nhật bài viết.')
+      throw err
+    }
+  }
+
   if (loading) {
     return <LoadingSkeleton lines={5} variant="user" />
   }
 
   return (
-    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
-      <article className="status-card profile-card p-4 sm:p-5 lg:p-6">
-        <h1 className="title-with-icon">
-          <UserRoundPen size={20} aria-hidden="true" />
-          <span>Profile</span>
-        </h1>
-        <p>Cập nhật thông tin cá nhân theo thời gian thực.</p>
+    <section className="cards-section cards-section--single profile-page mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card profile-card profile-hero-card p-4 sm:p-5 lg:p-6">
+        <div className="profile-hero">
+          <div className="profile-hero__identity">
+            <Avatar src={previewUrl ?? profile?.avatarUrl ?? null} alt={profile?.fullName ?? 'User avatar'} size="lg" />
 
-        <form className="auth-form" onSubmit={onSubmit} noValidate>
+            <div className="profile-hero__meta">
+              <p className="profile-hero__eyebrow">Social Profile</p>
+              <h1 className="title-with-icon">
+                <UserRoundPen size={20} aria-hidden="true" />
+                <span>{profile?.fullName ?? 'Profile'}</span>
+              </h1>
+
+              <div className="profile-hero__chips">
+                <span>
+                  <AtSign size={14} aria-hidden="true" />
+                  {profile?.userName ?? 'username'}
+                </span>
+                <span>
+                  <Mail size={14} aria-hidden="true" />
+                  {profile?.email ?? 'email'}
+                </span>
+              </div>
+
+              <p>{profile?.bio?.trim() ? profile.bio : 'Chưa có bio. Hãy thêm mô tả ngắn để hồ sơ nổi bật hơn.'}</p>
+            </div>
+          </div>
+
+          <div className="profile-hero__stats" aria-label="Profile statistics">
+            <article>
+              <strong>{userPosts.length}</strong>
+              <span>Bài đăng</span>
+            </article>
+            <article>
+              <strong>{userStories.length}</strong>
+              <span>Stories</span>
+            </article>
+            <article>
+              <strong>{isOwnProfile ? 'Bạn' : 'Công khai'}</strong>
+              <span>Chế độ hồ sơ</span>
+            </article>
+          </div>
+        </div>
+
+        <form className="auth-form profile-editor" onSubmit={onSubmit} noValidate>
+          <h2>Chỉnh sửa hồ sơ</h2>
+
+          {error ? <p className="form-error">{error}</p> : null}
+
           <TextInput
             label="Họ tên"
             error={errors.fullName?.message}
@@ -164,7 +280,7 @@ export function ProfilePage() {
 
           <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
 
-          {submitError ? <p className="form-error">Khong the cap nhat ho so. Vui long thu lai.</p> : null}
+          {submitError ? <p className="form-error">{submitError}</p> : null}
 
           <Button type="submit" busy={isSubmitting}>
             <Save size={15} aria-hidden="true" />
@@ -177,21 +293,26 @@ export function ProfilePage() {
         <div className="profile-activity__section">
           <h2 className="title-with-icon">
             <Newspaper size={18} aria-hidden="true" />
-            <span>Bai dang cua user</span>
+            <span>Bài đăng của người dùng</span>
           </h2>
 
+          {activityError ? <p className="form-error">{activityError}</p> : null}
           {activityLoading ? <LoadingSkeleton lines={3} variant="post" /> : null}
-          {!activityLoading && userPosts.length === 0 ? <p>Chua co bai dang nao.</p> : null}
+          {!activityLoading && userPosts.length === 0 ? <p>Chưa có bài đăng nào.</p> : null}
 
           <div className="profile-post-list">
             {userPosts.map((post) => (
-              <article key={post.id} className="profile-post-item">
-                <p>{post.content}</p>
-                {post.imageUrl ? <img src={post.imageUrl} alt="User post" className="profile-post-item__image" /> : null}
-                <small>
-                  {post.likeCount} likes • {post.commentCount} comments • {new Date(post.createdAt).toLocaleString()}
-                </small>
-              </article>
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={user?.id}
+                onLike={toggleLike}
+                onComment={addComment}
+                onShare={sharePost}
+                onReport={reportPost}
+                onDelete={deletePost}
+                onUpdate={updatePost}
+              />
             ))}
           </div>
         </div>
@@ -199,11 +320,11 @@ export function ProfilePage() {
         <div className="profile-activity__section">
           <h2 className="title-with-icon">
             <Clapperboard size={18} aria-hidden="true" />
-            <span>Stories cua user</span>
+            <span>Stories của người dùng</span>
           </h2>
 
-          {!isOwnProfile ? <p>Story chi kha dung voi ho so cua ban trong phien ban API hien tai.</p> : null}
-          {isOwnProfile && !activityLoading && userStories.length === 0 ? <p>Ban chua co story nao dang hoat dong.</p> : null}
+          {!isOwnProfile ? <p>Story hiện chỉ khả dụng với hồ sơ của bạn trong phiên bản API hiện tại.</p> : null}
+          {isOwnProfile && !activityLoading && userStories.length === 0 ? <p>Bạn chưa có story nào đang hoạt động.</p> : null}
 
           {isOwnProfile ? (
             <div className="profile-story-grid">
