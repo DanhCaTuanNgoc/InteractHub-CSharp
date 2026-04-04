@@ -421,6 +421,7 @@ reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport"
 
 ---
 
+
 ### ☁️ Phase 4 — Azure Deployment & CI/CD *(2–3 ngày)*
 
 > Covers: **D1**

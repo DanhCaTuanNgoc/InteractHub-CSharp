@@ -29,7 +29,7 @@ public static class MappingExtensions
         };
     }
 
-    public static PostResponse ToPostResponse(this Post post)
+    public static PostResponse ToPostResponse(this Post post, bool includeOriginalPost = true)
     {
         return new PostResponse
         {
@@ -38,6 +38,9 @@ public static class MappingExtensions
             ImageUrl = post.ImageUrl,
             CreatedAt = post.CreatedAt,
             OriginalPostId = post.OriginalPostId,
+            OriginalPost = includeOriginalPost && post.OriginalPost is not null
+                ? post.OriginalPost.ToPostResponse(false)
+                : null,
             LikeCount = post.Likes.Count,
             CommentCount = post.Comments.Count,
             User = post.User.ToUserSummary(),

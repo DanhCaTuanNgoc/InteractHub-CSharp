@@ -118,6 +118,74 @@ public class PostsService : IPostsService
             throw new UnauthorizedAccessException("Bạn không có quyền xóa bài viết này.");
         }
 
+        // If a shared post has been reshared, rewire those child shares to the same original post
+        // so deleting this intermediate share does not violate self-reference restrict FK.
+        if (post.OriginalPostId.HasValue)
+        {
+            var childSharedPosts = await _postsRepository.Query()
+                .Where(p => p.OriginalPostId == post.Id)
+                .ToListAsync();
+
+            foreach (var child in childSharedPosts)
+            {
+                child.OriginalPostId = post.OriginalPostId;
+                _postsRepository.Update(child);
+            }
+        }
+
+        var commentIds = await _commentsRepository.Query()
+            .Where(c => c.PostId == id)
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        if (commentIds.Count > 0)
+        {
+            var commentLikes = await _likesRepository.Query()
+                .Where(l => l.CommentId.HasValue && commentIds.Contains(l.CommentId.Value))
+                .ToListAsync();
+
+            foreach (var like in commentLikes)
+            {
+                _likesRepository.Delete(like);
+            }
+        }
+
+        var postLikes = await _likesRepository.Query()
+            .Where(l => l.PostId == id)
+            .ToListAsync();
+
+        foreach (var like in postLikes)
+        {
+            _likesRepository.Delete(like);
+        }
+
+        var comments = await _commentsRepository.Query()
+            .Where(c => c.PostId == id)
+            .ToListAsync();
+
+        foreach (var comment in comments)
+        {
+            _commentsRepository.Delete(comment);
+        }
+
+        var postHashtags = await _postHashtagsRepository.Query()
+            .Where(ph => ph.PostId == id)
+            .ToListAsync();
+
+        foreach (var postHashtag in postHashtags)
+        {
+            _postHashtagsRepository.Delete(postHashtag);
+        }
+
+        var reports = await _postReportsRepository.Query()
+            .Where(r => r.PostId == id)
+            .ToListAsync();
+
+        foreach (var report in reports)
+        {
+            _postReportsRepository.Delete(report);
+        }
+
         _postsRepository.Delete(post);
         await _postsRepository.SaveChangesAsync();
         return true;
@@ -210,18 +278,23 @@ public class PostsService : IPostsService
 
     public async Task<PostResponse?> ShareAsync(Guid id, string userId)
     {
-        var originalPost = await _postsRepository.Query().FirstOrDefaultAsync(p => p.Id == id);
-        if (originalPost is null)
+        var targetPost = await _postsRepository.Query()
+            .Include(p => p.OriginalPost)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (targetPost is null)
         {
             return null;
         }
 
+        var originalPost = targetPost.OriginalPost ?? targetPost;
+
         var sharedPost = new Post
         {
-            Content = originalPost.Content,
-            ImageUrl = originalPost.ImageUrl,
+            Content = string.Empty,
+            ImageUrl = null,
             UserId = userId,
-            OriginalPostId = id,
+            OriginalPostId = originalPost.Id,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -277,7 +350,17 @@ public class PostsService : IPostsService
             .Include(p => p.Comments)
                 .ThenInclude(c => c.User)
             .Include(p => p.PostHashtags)
-                .ThenInclude(ph => ph.Hashtag);
+                .ThenInclude(ph => ph.Hashtag)
+            .Include(p => p.OriginalPost)
+                .ThenInclude(op => op!.User)
+            .Include(p => p.OriginalPost)
+                .ThenInclude(op => op!.Likes)
+            .Include(p => p.OriginalPost)
+                .ThenInclude(op => op!.Comments)
+                    .ThenInclude(c => c.User)
+            .Include(p => p.OriginalPost)
+                .ThenInclude(op => op!.PostHashtags)
+                    .ThenInclude(ph => ph.Hashtag);
     }
 
     private async Task SyncHashtagsAsync(Guid postId, string content)

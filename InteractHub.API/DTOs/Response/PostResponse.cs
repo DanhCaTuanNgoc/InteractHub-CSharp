@@ -7,6 +7,7 @@ public class PostResponse
     public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public Guid? OriginalPostId { get; set; }
+    public PostResponse? OriginalPost { get; set; }
     public int LikeCount { get; set; }
     public int CommentCount { get; set; }
     public UserSummaryResponse User { get; set; } = new();

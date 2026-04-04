@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { clearAuthStorage, getAccessToken } from '../auth/tokenStorage'
+import { toSafeErrorMessage } from '../utils/errorMessage'
 
 export const AUTH_UNAUTHORIZED_EVENT = 'auth:unauthorized'
 
@@ -26,6 +27,6 @@ axiosClient.interceptors.response.use(
       window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT))
     }
 
-    return Promise.reject(error)
+    return Promise.reject(new Error(toSafeErrorMessage(error)))
   },
 )

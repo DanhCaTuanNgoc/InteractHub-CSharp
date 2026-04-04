@@ -68,7 +68,7 @@ export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
     <form className="post-form" onSubmit={submit}>
       <h2 className="title-with-icon">
         <PenSquare size={18} aria-hidden="true" />
-        <span>Tạo bài viết</span>
+        <span>Tạo bài viết của bạn</span>
       </h2>
 
       <TextInput

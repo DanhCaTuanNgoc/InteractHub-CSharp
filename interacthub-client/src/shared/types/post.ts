@@ -13,6 +13,7 @@ export type Post = {
   imageUrl?: string | null
   createdAt: string
   originalPostId?: string | null
+  originalPost?: Post | null
   likeCount: number
   commentCount: number
   user: UserSummary
