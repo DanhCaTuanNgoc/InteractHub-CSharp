@@ -10,6 +10,7 @@ using InteractHub.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -80,8 +81,16 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",
                 "https://localhost:5173",
+                "http://localhost:5174",
+                "https://localhost:5174",
                 "http://localhost:4173",
-                "https://localhost:4173")
+                "https://localhost:4173",
+                "http://127.0.0.1:5173",
+                "https://127.0.0.1:5173",
+                "http://127.0.0.1:5174",
+                "https://127.0.0.1:5174",
+                "http://127.0.0.1:4173",
+                "https://127.0.0.1:4173")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -92,6 +101,7 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -116,6 +126,20 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+var uploadsRequestPath = builder.Configuration["FileStorage:RequestPath"] ?? "/uploads";
+var normalizedUploadsPath = "/" + uploadsRequestPath.Trim().Trim('/');
+var uploadsPhysicalPath = Path.Combine(
+    app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"),
+    normalizedUploadsPath.Trim('/').Replace('/', Path.DirectorySeparatorChar));
+
+Directory.CreateDirectory(uploadsPhysicalPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPhysicalPath),
+    RequestPath = normalizedUploadsPath
+});
 
 app.UseCors("ReactClient");
 app.UseAuthentication();

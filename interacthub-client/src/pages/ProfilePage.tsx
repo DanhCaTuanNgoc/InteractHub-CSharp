@@ -116,6 +116,11 @@ export function ProfilePage() {
       return
     }
 
+    if (!isOwnProfile) {
+      setSubmitError('Bạn chỉ có thể cập nhật hồ sơ của chính mình.')
+      return
+    }
+
     setSubmitError(null)
     let avatarUrl = profile?.avatarUrl ?? undefined
 
@@ -256,37 +261,44 @@ export function ProfilePage() {
           </div>
         </div>
 
-        <form className="auth-form profile-editor" onSubmit={onSubmit} noValidate>
-          <h2>Chỉnh sửa hồ sơ</h2>
+        {isOwnProfile ? (
+          <form className="auth-form profile-editor" onSubmit={onSubmit} noValidate>
+            <h2>Chỉnh sửa hồ sơ</h2>
 
-          {error ? <p className="form-error">{error}</p> : null}
+            {error ? <p className="form-error">{error}</p> : null}
 
-          <TextInput
-            label="Họ tên"
-            error={errors.fullName?.message}
-            {...register('fullName', {
-              required: 'Họ tên là bắt buộc.',
-              minLength: { value: 2, message: 'Họ tên tối thiểu 2 ký tự.' },
-            })}
-          />
+            <TextInput
+              label="Họ tên"
+              error={errors.fullName?.message}
+              {...register('fullName', {
+                required: 'Họ tên là bắt buộc.',
+                minLength: { value: 2, message: 'Họ tên tối thiểu 2 ký tự.' },
+              })}
+            />
 
-          <TextInput
-            label="Bio"
-            error={errors.bio?.message}
-            {...register('bio', {
-              maxLength: { value: 280, message: 'Bio tối đa 280 ký tự.' },
-            })}
-          />
+            <TextInput
+              label="Bio"
+              error={errors.bio?.message}
+              {...register('bio', {
+                maxLength: { value: 280, message: 'Bio tối đa 280 ký tự.' },
+              })}
+            />
 
-          <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
+            <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
 
-          {submitError ? <p className="form-error">{submitError}</p> : null}
+            {submitError ? <p className="form-error">{submitError}</p> : null}
 
-          <Button type="submit" busy={isSubmitting}>
-            <Save size={15} aria-hidden="true" />
-            Lưu thay đổi
-          </Button>
-        </form>
+            <Button type="submit" busy={isSubmitting}>
+              <Save size={15} aria-hidden="true" />
+              Lưu thay đổi
+            </Button>
+          </form>
+        ) : (
+          <div className="auth-form profile-editor" role="status" aria-live="polite">
+            <h2>Chỉnh sửa hồ sơ</h2>
+            <p>Bạn đang xem hồ sơ của người dùng khác nên không thể đổi avatar hoặc cập nhật thông tin.</p>
+          </div>
+        )}
       </article>
 
       <article className="status-card profile-activity p-4 sm:p-5 lg:p-6">
