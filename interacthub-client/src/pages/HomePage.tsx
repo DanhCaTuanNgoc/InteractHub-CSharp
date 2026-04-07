@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Newspaper } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { usePosts } from '../features/posts/hooks/usePosts'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
@@ -13,12 +12,10 @@ export function HomePage() {
   const { user } = useAuth()
   const {
     posts,
-    totalPosts,
     totalPages,
     currentPage,
     loading,
     saving,
-    error,
     createPost,
     toggleLike,
     addComment,

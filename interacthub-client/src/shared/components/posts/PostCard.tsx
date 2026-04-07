@@ -1,5 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Clock3, Ellipsis, Heart, MessageCircle, Pencil, Send, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ROUTES } from '../../constants/routes'
 import type { Post } from '../../types/post'
 import { Avatar } from '../common/Avatar'
 import { Button } from '../common/Button'
@@ -96,11 +98,13 @@ export function PostCard({
     <article className="post-card">
       <header className="post-card__header">
         <div className="post-card__author">
-          <Avatar src={post.user.avatarUrl} alt={post.user.fullName} />
-          <div>
-            <h3>{post.user.fullName}</h3>
-            <p>@{post.user.userName}</p>
-          </div>
+          <Link to={ROUTES.profile(post.user.id)} className="post-card__author-link" aria-label={`Xem hồ sơ của ${post.user.fullName}`}>
+            <Avatar src={post.user.avatarUrl} alt={post.user.fullName} />
+            <div>
+              <h3>{post.user.fullName}</h3>
+              <p>@{post.user.userName}</p>
+            </div>
+          </Link>
         </div>
         <div className="post-card__meta-actions">
           <time dateTime={post.createdAt} className="post-card__time">
@@ -172,11 +176,17 @@ export function PostCard({
         <section className="post-card__shared-original">
           <header className="post-card__shared-header">
             <div className="post-card__author">
-              <Avatar src={originalPost.user.avatarUrl} alt={originalPost.user.fullName} />
-              <div>
-                <h4>{originalPost.user.fullName}</h4>
-                <p>@{originalPost.user.userName}</p>
-              </div>
+              <Link
+                to={ROUTES.profile(originalPost.user.id)}
+                className="post-card__author-link"
+                aria-label={`Xem hồ sơ của ${originalPost.user.fullName}`}
+              >
+                <Avatar src={originalPost.user.avatarUrl} alt={originalPost.user.fullName} />
+                <div>
+                  <h4>{originalPost.user.fullName}</h4>
+                  <p>@{originalPost.user.userName}</p>
+                </div>
+              </Link>
             </div>
             <time dateTime={originalPost.createdAt} className="post-card__time">
               <Clock3 size={13} aria-hidden="true" />
@@ -225,7 +235,13 @@ export function PostCard({
         <section className="post-card__comments">
           {post.recentComments.map((comment) => (
             <article key={comment.id} className="post-card__comment-item">
-              <strong>{comment.user.fullName}</strong>
+              <Link
+                to={ROUTES.profile(comment.user.id)}
+                className="post-card__comment-author-link"
+                aria-label={`Xem hồ sơ của ${comment.user.fullName}`}
+              >
+                <strong>{comment.user.fullName}</strong>
+              </Link>
               <p>{comment.content}</p>
             </article>
           ))}

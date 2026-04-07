@@ -407,6 +407,19 @@ p {
   gap: 0.65rem;
 }
 
+.post-card__author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-card__author-link:hover h3,
+.post-card__author-link:hover h4 {
+  color: var(--brand);
+}
+
 .post-card__header p,
 .post-card__header time,
 .post-card__actions span {
@@ -586,6 +599,15 @@ p {
 
 .post-card__comment-item p {
   margin-top: 0.25rem;
+}
+
+.post-card__comment-author-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-card__comment-author-link:hover {
+  color: var(--brand);
 }
 
 .form-control {
@@ -926,6 +948,18 @@ p {
   gap: 0.62rem;
 }
 
+.friend-request-card__author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.friend-request-card__author-link:hover h3 {
+  color: var(--brand);
+}
+
 .friend-request-card__author h3 {
   margin: 0;
   font-size: 1rem;
@@ -1012,6 +1046,18 @@ p {
   align-items: center;
   gap: 0.65rem;
   margin-bottom: 0.4rem;
+}
+
+.user-card__identity-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.user-card__identity-link:hover h3 {
+  color: var(--brand);
 }
 
 .user-card p,
@@ -1190,6 +1236,18 @@ p {
   font-size: 1.08rem;
 }
 
+.profile-relationship-status {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-relationship-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
 .profile-activity {
   display: grid;
   gap: 1rem;
@@ -1296,6 +1354,58 @@ p {
   margin-top: 0.7rem;
   display: grid;
   gap: 0.9rem;
+}
+
+.register-quality-panel {
+  border: 1px solid rgba(222, 210, 187, 0.9);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.94);
+  padding: 0.75rem 0.85rem;
+}
+
+.register-quality-panel h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-family: var(--font-title);
+}
+
+.register-quality-panel ul {
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.38rem;
+}
+
+.register-quality-panel li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.register-quality-panel li.is-valid {
+  color: #0f766e;
+}
+
+.register-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.register-terms input {
+  margin-top: 0.15rem;
+  accent-color: var(--brand-strong);
+}
+
+.register-validation-hint {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
 }
 
 @media (max-width: 920px) {

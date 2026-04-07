@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Clock3, RefreshCw, UserRoundPlus, X } from 'lucide-react'
+import { Check, Clock3, UserRoundPlus, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Button } from '../shared/components/common/Button'
 import { Avatar } from '../shared/components/common/Avatar'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
+import { ROUTES } from '../shared/constants/routes'
 import { friendService } from '../shared/services/friendService'
 import { notificationService } from '../shared/services/notificationService'
 import type { Notification } from '../shared/types/notification'
@@ -94,11 +96,17 @@ export function FriendRequestsPage() {
             <article key={request.id} className="friend-request-card">
               <div className="friend-request-card__header">
                 <div className="friend-request-card__author">
-                  <Avatar src={request.sender.avatarUrl} alt={request.sender.fullName} />
-                  <div>
-                    <h3>{request.sender.fullName}</h3>
-                    <p>@{request.sender.userName}</p>
-                  </div>
+                  <Link
+                    to={ROUTES.profile(request.sender.id)}
+                    className="friend-request-card__author-link"
+                    aria-label={`Xem hồ sơ của ${request.sender.fullName}`}
+                  >
+                    <Avatar src={request.sender.avatarUrl} alt={request.sender.fullName} />
+                    <div>
+                      <h3>{request.sender.fullName}</h3>
+                      <p>@{request.sender.userName}</p>
+                    </div>
+                  </Link>
                 </div>
 
                 <small className="friend-request-card__time">

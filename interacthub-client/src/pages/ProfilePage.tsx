@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AtSign, Clapperboard, Mail, Newspaper, Save, UserRoundPen } from 'lucide-react'
+import { AtSign, Check, Clapperboard, Clock3, Mail, Newspaper, Save, UserRoundCheck, UserRoundPen, UserRoundPlus, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 import { Avatar } from '../shared/components/common/Avatar'
@@ -9,10 +9,12 @@ import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
 import { PostCard } from '../shared/components/posts/PostCard'
 import { TextInput } from '../shared/components/common/TextInput'
 import { useAuth } from '../features/auth/hooks/useAuth'
+import { friendService } from '../shared/services/friendService'
 import { postService } from '../shared/services/postService'
 import { storyService } from '../shared/services/storyService'
 import { uploadService } from '../shared/services/uploadService'
 import { userService } from '../shared/services/userService'
+import type { FriendshipRelationship } from '../shared/types/friendshipRelationship'
 import type { Post } from '../shared/types/post'
 import type { Story } from '../shared/types/story'
 import type { UserSummary } from '../shared/types/user'
@@ -35,6 +37,10 @@ export function ProfilePage() {
   const [userStories, setUserStories] = useState<Story[]>([])
   const [activityLoading, setActivityLoading] = useState(false)
   const [activityError, setActivityError] = useState<string | null>(null)
+  const [relationship, setRelationship] = useState<FriendshipRelationship | null>(null)
+  const [relationshipLoading, setRelationshipLoading] = useState(false)
+  const [relationshipBusy, setRelationshipBusy] = useState(false)
+  const [relationshipError, setRelationshipError] = useState<string | null>(null)
 
   const profileId = useMemo(() => (id === 'me' ? user?.id : id), [id, user?.id])
   const isOwnProfile = useMemo(() => profileId === user?.id, [profileId, user?.id])
@@ -110,6 +116,31 @@ export function ProfilePage() {
 
     void loadActivity()
   }, [profileId])
+
+  useEffect(() => {
+    if (!profileId || isOwnProfile) {
+      setRelationship(null)
+      setRelationshipError(null)
+      return
+    }
+
+    const loadRelationship = async () => {
+      setRelationshipLoading(true)
+      setRelationshipError(null)
+
+      try {
+        const current = await friendService.getRelationship(profileId)
+        setRelationship(current)
+      } catch (err) {
+        setRelationship(null)
+        setRelationshipError(err instanceof Error ? err.message : 'Không thể tải trạng thái kết bạn.')
+      } finally {
+        setRelationshipLoading(false)
+      }
+    }
+
+    void loadRelationship()
+  }, [isOwnProfile, profileId])
 
   const onSubmit = handleSubmit(async (values) => {
     if (!profileId) {
@@ -212,6 +243,59 @@ export function ProfilePage() {
     }
   }
 
+  const handleRelationshipAction = async (action: 'send' | 'accept' | 'decline' | 'remove') => {
+    if (!profileId) {
+      return
+    }
+
+    setRelationshipBusy(true)
+    setRelationshipError(null)
+
+    try {
+      if (action === 'send') {
+        await friendService.sendRequest(profileId)
+      }
+
+      if (action === 'accept') {
+        await friendService.accept(profileId)
+      }
+
+      if (action === 'decline') {
+        await friendService.decline(profileId)
+      }
+
+      if (action === 'remove') {
+        await friendService.remove(profileId)
+      }
+
+      const latest = await friendService.getRelationship(profileId)
+      setRelationship(latest)
+    } catch (err) {
+      setRelationshipError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái bạn bè.')
+    } finally {
+      setRelationshipBusy(false)
+    }
+  }
+
+  const relationshipLabel = useMemo(() => {
+    if (isOwnProfile) {
+      return 'Bạn'
+    }
+
+    switch (relationship?.status) {
+      case 'Friends':
+        return 'Bạn bè'
+      case 'RequestSent':
+        return 'Đã gửi lời mời'
+      case 'RequestReceived':
+        return 'Đã nhận lời mời'
+      case 'Self':
+        return 'Bạn'
+      default:
+        return 'Chưa kết bạn'
+    }
+  }, [isOwnProfile, relationship?.status])
+
   if (loading) {
     return <LoadingSkeleton lines={5} variant="user" />
   }
@@ -255,7 +339,7 @@ export function ProfilePage() {
               <span>Stories</span>
             </article>
             <article>
-              <strong>{isOwnProfile ? 'Bạn' : 'Công khai'}</strong>
+              <strong>{relationshipLabel}</strong>
               <span>Chế độ hồ sơ</span>
             </article>
           </div>
@@ -295,8 +379,49 @@ export function ProfilePage() {
           </form>
         ) : (
           <div className="auth-form profile-editor" role="status" aria-live="polite">
-            <h2>Chỉnh sửa hồ sơ</h2>
-            <p>Bạn đang xem hồ sơ của người dùng khác nên không thể đổi avatar hoặc cập nhật thông tin.</p>
+            <h2>Kết nối</h2>
+            <p>Bạn đang xem hồ sơ của người dùng khác.</p>
+
+            {relationshipLoading ? <p>Đang tải trạng thái kết bạn...</p> : null}
+            {relationshipError ? <p className="form-error">{relationshipError}</p> : null}
+
+            {!relationshipLoading ? (
+              <p className="profile-relationship-status">Trạng thái hiện tại: {relationshipLabel}</p>
+            ) : null}
+
+            {!relationshipLoading && relationship?.status === 'NotFriends' ? (
+              <Button type="button" variant="ghost" busy={relationshipBusy} onClick={() => void handleRelationshipAction('send')}>
+                <UserRoundPlus size={15} aria-hidden="true" />
+                Gửi lời mời kết bạn
+              </Button>
+            ) : null}
+
+            {!relationshipLoading && relationship?.status === 'RequestSent' ? (
+              <Button type="button" variant="ghost" disabled>
+                <Clock3 size={15} aria-hidden="true" />
+                Đã gửi lời mời
+              </Button>
+            ) : null}
+
+            {!relationshipLoading && relationship?.status === 'RequestReceived' ? (
+              <div className="profile-relationship-actions">
+                <Button type="button" variant="primary" busy={relationshipBusy} onClick={() => void handleRelationshipAction('accept')}>
+                  <Check size={15} aria-hidden="true" />
+                  Chấp nhận
+                </Button>
+                <Button type="button" variant="danger" busy={relationshipBusy} onClick={() => void handleRelationshipAction('decline')}>
+                  <X size={15} aria-hidden="true" />
+                  Từ chối
+                </Button>
+              </div>
+            ) : null}
+
+            {!relationshipLoading && relationship?.status === 'Friends' ? (
+              <Button type="button" variant="danger" busy={relationshipBusy} onClick={() => void handleRelationshipAction('remove')}>
+                <UserRoundCheck size={15} aria-hidden="true" />
+                Hủy kết bạn
+              </Button>
+            ) : null}
           </div>
         )}
       </article>

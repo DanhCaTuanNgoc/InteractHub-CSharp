@@ -69,6 +69,13 @@ public class FriendsController : ControllerBase
         return Ok(ApiResponse<List<UserSummaryResponse>>.Ok(friends));
     }
 
+    [HttpGet("status/{userId}")]
+    public async Task<IActionResult> GetRelationshipStatus(string userId)
+    {
+        var relationship = await _friendsService.GetRelationshipAsync(GetCurrentUserId(), userId);
+        return Ok(ApiResponse<FriendshipRelationshipResponse>.Ok(relationship));
+    }
+
     private string GetCurrentUserId()
     {
         return User.FindFirstValue(ClaimTypes.NameIdentifier)

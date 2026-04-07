@@ -9,4 +9,5 @@ public interface IFriendsService
     Task<FriendshipResponse?> DeclineRequestAsync(string receiverId, string senderId);
     Task<bool> RemoveFriendAsync(string currentUserId, string friendUserId);
     Task<List<UserSummaryResponse>> GetFriendsAsync(string currentUserId);
+    Task<FriendshipRelationshipResponse> GetRelationshipAsync(string currentUserId, string targetUserId);
 }

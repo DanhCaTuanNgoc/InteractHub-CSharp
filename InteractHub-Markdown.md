@@ -426,86 +426,89 @@ reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport"
 
 > Covers: **D1**
 
-#### Azure Resources cần tạo:
+Mục tiêu phase này là đi từ local sang production theo thứ tự: **hạ tầng Azure → cấu hình secrets → CI/CD → xác nhận URL live → hoàn thiện tài liệu**.
 
-| Resource | Dùng cho |
-|----------|----------|
-| Resource Group | Nhóm tất cả resources |
-| App Service (Windows/Linux) | Host .NET API |
-| Azure SQL Database | Production DB |
-| Azure Blob Storage | Lưu ảnh upload |
-| Application Insights | Monitoring & logs |
-| Static Web App *(optional)* | Host React SPA |
+#### 4.1 Chuẩn bị trước khi deploy
 
-#### GitHub Actions workflow mẫu (`.github/workflows/azure-deploy.yml`):
+- [ ] Đảm bảo branch `main` build pass local: `dotnet test` và `npm run build`
+- [ ] Có Azure subscription đang hoạt động
+- [ ] Có quyền tạo Resource Group, App Service, SQL, Storage
+- [ ] Đã tạo sẵn GitHub repository cho project
 
-```yaml
-name: Build and Deploy to Azure
+#### 4.2 Tạo Azure resources (Portal)
 
-on:
-  push:
-    branches: [ main ]
+Tạo theo đúng thứ tự dưới đây để đỡ phải quay lại sửa cấu hình:
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
-          
-      - name: Restore & Build
-        run: |
-          dotnet restore
-          dotnet build --no-restore
-          
-      - name: Run Tests
-        run: dotnet test --no-build --verbosity normal
+1. Tạo **Resource Group** (ví dụ: `rg-interacthub-prod`)
+2. Tạo **Azure SQL Server + Azure SQL Database**
+3. Tạo **Storage Account + Blob Container** (ví dụ container: `uploads`)
+4. Tạo **App Service Plan + Web App** cho API (.NET 8)
+5. Bật **Application Insights** cho Web App
+6. (Khuyến nghị) Tạo **Static Web App** cho React frontend
 
-  deploy-api:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Publish
-        run: dotnet publish InteractHub.API -c Release -o ./publish
-        
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ secrets.AZURE_APP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: ./publish
+#### 4.3 Cấu hình App Service (không hard-code secrets)
 
-  deploy-frontend:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build React
-        run: |
-          cd interacthub-client
-          npm ci
-          npm run build
-      - name: Deploy to Azure Static Web Apps
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          app_location: "interacthub-client"
-          output_location: "dist"
+Vào App Service → **Settings → Environment variables**, thêm:
+
+- `ConnectionStrings__DefaultConnection` = Azure SQL connection string
+- `AzureBlob__ConnectionString` = storage connection string
+- `AzureBlob__ContainerName` = uploads
+- `Jwt__Secret`, `Jwt__Issuer`, `Jwt__Audience`
+- `ASPNETCORE_ENVIRONMENT` = Production
+- `Cors__AllowedOrigins__0` = URL frontend production
+
+> Lưu ý: Tên key dùng dạng `__` để map đúng vào cấu hình .NET.
+
+#### 4.4 Cấu hình GitHub Secrets cho CI/CD
+
+Trong GitHub repo → **Settings → Secrets and variables → Actions**, thêm các secrets:
+
+- `AZURE_WEBAPP_NAME`
+- `AZURE_WEBAPP_PUBLISH_PROFILE`
+- `AZURE_STATIC_WEB_APPS_API_TOKEN` *(nếu deploy frontend lên Static Web Apps)*
+- `VITE_API_BASE_URL` *(URL API production, ví dụ `https://your-api.azurewebsites.net/api`)*
+
+#### 4.5 CI/CD pipeline YAML
+
+- Workflow chính đặt tại: `.github/workflows/azure-deploy.yml`
+- Luồng chạy: **build + test** → **deploy API** → **deploy frontend**
+- Trigger: push vào nhánh `main`
+
+Nếu chưa có file pipeline, tạo theo mẫu trong repo ở `.github/workflows/azure-deploy.yml`.
+
+#### 4.6 Deploy database migration lên Azure SQL
+
+Chạy migration vào production DB trước khi smoke test:
+
+```bash
+dotnet tool install --global dotnet-ef
+dotnet ef database update --project InteractHub.API --startup-project InteractHub.API
 ```
 
-**Checklist D1:**
-- [ ] Tạo tất cả Azure resources
-- [ ] Connection string trong Azure App Service Configuration (không commit lên git)
-- [ ] CI/CD pipeline chạy thành công ít nhất 1 lần
-- [ ] App live trên URL Azure
-- [ ] Application Insights setup
-- [ ] Viết deployment documentation có ảnh chụp màn hình
+> Lệnh này phải chạy với connection string production (qua environment/app settings).
+
+#### 4.7 Smoke test sau deploy
+
+1. Mở Swagger: `https://<api-app-name>.azurewebsites.net/swagger`
+2. Test `POST /api/auth/register`, `POST /api/auth/login`
+3. Test endpoint có `[Authorize]`
+4. Upload ảnh thử để xác nhận Blob hoạt động
+5. Mở frontend URL và kiểm tra luồng login → feed
+
+#### 4.8 Checklist D1 (nộp bài)
+
+- [ ] App live trên Azure URL
+- [ ] CI/CD pipeline YAML
+- [ ] Azure SQL + Blob configured
+- [ ] Deployment documentation
+
+#### 4.9 Bằng chứng nên chụp màn hình khi nộp
+
+- [ ] GitHub Actions run xanh (build, test, deploy)
+- [ ] App Service Overview (URL + trạng thái Running)
+- [ ] SQL Database Overview
+- [ ] Storage container có file upload thực tế
+- [ ] Swagger production và giao diện frontend production
 
 ---
 
@@ -679,9 +682,9 @@ jobs:
 
 ### D1 — Deployment (1đ)
 - [ ] App live trên Azure URL
-- [ ] CI/CD pipeline YAML
+- [x] CI/CD pipeline YAML (`.github/workflows/azure-deploy.yml`)
 - [ ] Azure SQL + Blob configured
-- [ ] Deployment documentation
+- [x] Deployment documentation (`docs/deployment-azure.md`)
 
 ---
 

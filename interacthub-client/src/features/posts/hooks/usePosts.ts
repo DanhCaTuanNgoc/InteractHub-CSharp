@@ -13,11 +13,14 @@ export function usePosts() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalPosts, setTotalPosts] = useState(0)
 
-  const fetchPosts = useCallback(async (page: number) => {
+  const fetchPosts = useCallback(async (page: number, force = false) => {
     setLoading(true)
     setError(null)
 
     try {
+      if (force) {
+        postService.invalidateFeedCache()
+      }
       const feed = await postService.getFeed(page, PAGE_SIZE)
       setPosts(feed.items)
       setCurrentPage(feed.page)
@@ -40,8 +43,9 @@ export function usePosts() {
 
     try {
       await postService.create({ content, imageUrl })
+      postService.invalidateFeedCache()
       setCurrentPage(1)
-      await fetchPosts(1)
+      await fetchPosts(1, true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tạo bài viết.')
       throw err
@@ -82,6 +86,7 @@ export function usePosts() {
   const sharePost = useCallback(async (postId: string) => {
     try {
       const shared = await postService.share(postId)
+      postService.invalidateFeedCache()
       setPosts((current) => [shared, ...current])
       setTotalPosts((current) => current + 1)
     } catch (err) {
@@ -102,6 +107,7 @@ export function usePosts() {
   const deletePost = useCallback(async (postId: string) => {
     try {
       await postService.remove(postId)
+      postService.invalidateFeedCache()
       setPosts((current) => current.filter((post) => post.id !== postId))
       setTotalPosts((current) => Math.max(0, current - 1))
     } catch (err) {
@@ -113,6 +119,7 @@ export function usePosts() {
   const updatePost = useCallback(async (postId: string, content: string) => {
     try {
       const updated = await postService.update(postId, { content })
+      postService.invalidateFeedCache()
       setPosts((current) => current.map((post) => (post.id === postId ? updated : post)))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể cập nhật bài viết.')

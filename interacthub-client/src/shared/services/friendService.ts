@@ -1,6 +1,7 @@
 import { axiosClient } from '../api/axiosClient'
 import type { ApiResponse } from '../types/api'
 import type { Friendship } from '../types/friendship'
+import type { FriendshipRelationship } from '../types/friendshipRelationship'
 import type { UserSummary } from '../types/user'
 
 async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>): Promise<T> {
@@ -14,6 +15,9 @@ async function unwrap<T>(promise: Promise<{ data: ApiResponse<T> }>): Promise<T>
 export const friendService = {
   getFriends(): Promise<UserSummary[]> {
     return unwrap(axiosClient.get<ApiResponse<UserSummary[]>>('/friends'))
+  },
+  getRelationship(userId: string): Promise<FriendshipRelationship> {
+    return unwrap(axiosClient.get<ApiResponse<FriendshipRelationship>>(`/friends/status/${userId}`))
   },
   sendRequest(userId: string): Promise<Friendship> {
     return unwrap(axiosClient.post<ApiResponse<Friendship>>(`/friends/request/${userId}`))

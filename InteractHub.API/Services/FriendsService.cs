@@ -27,9 +27,41 @@ public class FriendsService : IFriendsService
             (f.SenderId == senderId && f.ReceiverId == receiverId) ||
             (f.SenderId == receiverId && f.ReceiverId == senderId));
 
+        if (existing is not null && existing.Status == FriendshipStatus.Accepted)
+        {
+            throw new InvalidOperationException("Hai người đã là bạn bè.");
+        }
+
         if (existing is not null && existing.Status == FriendshipStatus.Pending)
         {
             throw new InvalidOperationException("Lời mời kết bạn đã tồn tại.");
+        }
+
+        var sameDirectionDeclined = await _friendshipsRepository.Query().FirstOrDefaultAsync(f =>
+            f.SenderId == senderId &&
+            f.ReceiverId == receiverId &&
+            f.Status == FriendshipStatus.Declined);
+
+        if (sameDirectionDeclined is not null)
+        {
+            sameDirectionDeclined.Status = FriendshipStatus.Pending;
+            sameDirectionDeclined.CreatedAt = DateTime.UtcNow;
+            sameDirectionDeclined.UpdatedAt = DateTime.UtcNow;
+            _friendshipsRepository.Update(sameDirectionDeclined);
+            await _friendshipsRepository.SaveChangesAsync();
+
+            await _notificationsService.CreateAsync(
+                senderId,
+                receiverId,
+                "FriendRequest",
+                "Bạn có một lời mời kết bạn mới.");
+
+            var refreshed = await _friendshipsRepository.Query()
+                .Include(f => f.Sender)
+                .Include(f => f.Receiver)
+                .FirstAsync(f => f.Id == sameDirectionDeclined.Id);
+
+            return refreshed.ToFriendshipResponse();
         }
 
         var friendship = new Friendship
@@ -140,5 +172,53 @@ public class FriendsService : IFriendsService
             .Select(f => f.SenderId == currentUserId ? f.Receiver : f.Sender)
             .Select(u => u.ToUserSummary())
             .ToList();
+    }
+
+    public async Task<FriendshipRelationshipResponse> GetRelationshipAsync(string currentUserId, string targetUserId)
+    {
+        if (currentUserId == targetUserId)
+        {
+            return new FriendshipRelationshipResponse
+            {
+                Status = "Self"
+            };
+        }
+
+        var friendships = await _friendshipsRepository.Query()
+            .Where(f =>
+                (f.SenderId == currentUserId && f.ReceiverId == targetUserId) ||
+                (f.SenderId == targetUserId && f.ReceiverId == currentUserId))
+            .OrderByDescending(f => f.Status == FriendshipStatus.Accepted)
+            .ThenByDescending(f => f.UpdatedAt ?? f.CreatedAt)
+            .ToListAsync();
+
+        var latest = friendships.FirstOrDefault();
+
+        if (latest is null || latest.Status == FriendshipStatus.Declined)
+        {
+            return new FriendshipRelationshipResponse
+            {
+                Status = "NotFriends"
+            };
+        }
+
+        if (latest.Status == FriendshipStatus.Accepted)
+        {
+            return new FriendshipRelationshipResponse
+            {
+                Status = "Friends",
+                FriendshipId = latest.Id.ToString(),
+                SenderId = latest.SenderId,
+                ReceiverId = latest.ReceiverId
+            };
+        }
+
+        return new FriendshipRelationshipResponse
+        {
+            Status = latest.SenderId == currentUserId ? "RequestSent" : "RequestReceived",
+            FriendshipId = latest.Id.ToString(),
+            SenderId = latest.SenderId,
+            ReceiverId = latest.ReceiverId
+        };
     }
 }

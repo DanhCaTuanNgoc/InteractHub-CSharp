@@ -11,6 +11,9 @@ type PostFormValues = {
   image: FileList
 }
 
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'])
+
 type PostFormProps = {
   onSubmitPost: (content: string, imageUrl?: string) => Promise<void>
   busy?: boolean
@@ -84,10 +87,27 @@ export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
 
       <FileInput
         label="Ảnh đính kèm"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
         previewUrl={previewUrl}
         error={errors.image?.message}
-        {...register('image')}
+        {...register('image', {
+          validate: {
+            supportedType: (files) => {
+              const file = files?.[0]
+              if (!file) {
+                return true
+              }
+              return ALLOWED_IMAGE_TYPES.has(file.type.toLowerCase()) || 'Dinh dang anh khong ho tro. Chi chap nhan JPG, PNG, WEBP, GIF.'
+            },
+            maxSize: (files) => {
+              const file = files?.[0]
+              if (!file) {
+                return true
+              }
+              return file.size <= MAX_IMAGE_SIZE_BYTES || 'Anh vuot qua gioi han 5MB. Vui long chon anh nho hon.'
+            },
+          },
+        })}
       />
 
       {submitError ? <p className="form-error">{submitError}</p> : null}
