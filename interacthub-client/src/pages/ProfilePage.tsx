@@ -6,6 +6,7 @@ import { Avatar } from '../shared/components/common/Avatar'
 import { Button } from '../shared/components/common/Button'
 import { FileInput } from '../shared/components/common/FileInput'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
+import { NoticeModal } from '../shared/components/common/NoticeModal'
 import { PostCard } from '../shared/components/posts/PostCard'
 import { TextInput } from '../shared/components/common/TextInput'
 import { useAuth } from '../features/auth/hooks/useAuth'
@@ -25,6 +26,13 @@ type ProfileFormValues = {
   avatar: FileList
 }
 
+type NoticeState = {
+  open: boolean
+  type: 'success' | 'error' | 'info'
+  title: string
+  message: string
+}
+
 export function ProfilePage() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -41,6 +49,16 @@ export function ProfilePage() {
   const [relationshipLoading, setRelationshipLoading] = useState(false)
   const [relationshipBusy, setRelationshipBusy] = useState(false)
   const [relationshipError, setRelationshipError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<NoticeState>({
+    open: false,
+    type: 'info',
+    title: '',
+    message: '',
+  })
+
+  const showNotice = (next: Omit<NoticeState, 'open'>) => {
+    setNotice({ open: true, ...next })
+  }
 
   const profileId = useMemo(() => (id === 'me' ? user?.id : id), [id, user?.id])
   const isOwnProfile = useMemo(() => profileId === user?.id, [profileId, user?.id])
@@ -149,6 +167,11 @@ export function ProfilePage() {
 
     if (!isOwnProfile) {
       setSubmitError('Bạn chỉ có thể cập nhật hồ sơ của chính mình.')
+      showNotice({
+        type: 'info',
+        title: 'Không thể cập nhật',
+        message: 'Bạn chỉ có thể cập nhật hồ sơ của chính mình.',
+      })
       return
     }
 
@@ -168,8 +191,18 @@ export function ProfilePage() {
       })
 
       setProfile(updated)
+      showNotice({
+        type: 'success',
+        title: 'Cập nhật thành công',
+        message: 'Thông tin hồ sơ đã được cập nhật.',
+      })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Không thể cập nhật hồ sơ.')
+      showNotice({
+        type: 'error',
+        title: 'Cập nhật thất bại',
+        message: 'Cập nhật bị lỗi. Vui lòng thử lại sau ít phút.',
+      })
     }
   })
 
@@ -252,26 +285,42 @@ export function ProfilePage() {
     setRelationshipError(null)
 
     try {
+      let successMessage = 'Cập nhật trạng thái bạn bè thành công.'
+
       if (action === 'send') {
         await friendService.sendRequest(profileId)
+        successMessage = 'Đã gửi lời mời kết bạn thành công.'
       }
 
       if (action === 'accept') {
         await friendService.accept(profileId)
+        successMessage = 'Đã chấp nhận lời mời kết bạn thành công.'
       }
 
       if (action === 'decline') {
         await friendService.decline(profileId)
+        successMessage = 'Đã từ chối lời mời kết bạn.'
       }
 
       if (action === 'remove') {
         await friendService.remove(profileId)
+        successMessage = 'Đã hủy kết bạn thành công.'
       }
 
       const latest = await friendService.getRelationship(profileId)
       setRelationship(latest)
+      showNotice({
+        type: 'success',
+        title: 'Thao tác thành công',
+        message: successMessage,
+      })
     } catch (err) {
       setRelationshipError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái bạn bè.')
+      showNotice({
+        type: 'error',
+        title: 'Thao tác thất bại',
+        message: 'Không thể xử lý yêu cầu kết bạn. Vui lòng thử lại.',
+      })
     } finally {
       setRelationshipBusy(false)
     }
@@ -302,6 +351,14 @@ export function ProfilePage() {
 
   return (
     <section className="cards-section cards-section--single profile-page mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <NoticeModal
+        open={notice.open}
+        type={notice.type}
+        title={notice.title}
+        message={notice.message}
+        onClose={() => setNotice((current) => ({ ...current, open: false }))}
+      />
+
       <article className="status-card profile-card profile-hero-card p-4 sm:p-5 lg:p-6">
         <div className="profile-hero">
           <div className="profile-hero__identity">

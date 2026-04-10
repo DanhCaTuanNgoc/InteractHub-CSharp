@@ -4,6 +4,8 @@ using Azure.Storage.Blobs.Models;
 using InteractHub.API.DTOs.Response;
 using InteractHub.API.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System.Net.Sockets;
 
 namespace InteractHub.API.Services;
 
@@ -76,6 +78,22 @@ public class FileUploadService : IFileUploadService
 
     public async Task<FileUploadResponse> UploadImageAsync(IFormFile file, string userId, CancellationToken cancellationToken = default)
     {
+        var traceId = _httpContextAccessor.HttpContext?.Request.Headers["X-Upload-Trace-Id"].ToString();
+        if (string.IsNullOrWhiteSpace(traceId))
+        {
+            traceId = _httpContextAccessor.HttpContext?.TraceIdentifier ?? Guid.NewGuid().ToString("N");
+        }
+
+        _logger.LogInformation(
+            "[UPLOAD][SERVICE_START] TraceId={TraceId}, UserId={UserId}, FileName={FileName}, ContentType={ContentType}, Size={Size}, BlobContainer={Container}, BlobBaseFolder={BaseFolder}",
+            traceId,
+            userId,
+            file.FileName,
+            file.ContentType,
+            file.Length,
+            _containerClient.Name,
+            _baseFolder);
+
         if (file.Length <= 0)
         {
             throw new InvalidOperationException("File upload is empty.");
@@ -99,6 +117,13 @@ public class FileUploadService : IFileUploadService
         var yearMonth = DateTime.UtcNow.ToString("yyyy/MM");
         var blobName = $"{_baseFolder.Trim('/')}/{yearMonth}/{userId}/{Guid.NewGuid():N}{safeExtension}";
 
+        _logger.LogInformation(
+            "[UPLOAD][SERVICE_BLOB_TARGET] TraceId={TraceId}, BlobName={BlobName}, LocalRootPath={LocalRootPath}, LocalRequestPath={LocalRequestPath}",
+            traceId,
+            blobName,
+            _localRootPath,
+            _localRequestPath);
+
         try
         {
             await _containerClient.CreateIfNotExistsAsync(PublicAccessType.None, cancellationToken: cancellationToken);
@@ -117,6 +142,13 @@ public class FileUploadService : IFileUploadService
                 },
                 cancellationToken);
 
+            _logger.LogInformation(
+                "[UPLOAD][SERVICE_BLOB_SUCCESS] TraceId={TraceId}, Url={Url}, Size={Size}, ContentType={ContentType}",
+                traceId,
+                blobClient.Uri.ToString(),
+                file.Length,
+                file.ContentType);
+
             return new FileUploadResponse
             {
                 FileName = Path.GetFileName(blobName),
@@ -127,8 +159,16 @@ public class FileUploadService : IFileUploadService
         }
         catch (Exception ex) when (IsStorageConnectivityIssue(ex))
         {
-            _logger.LogWarning(ex, "Blob upload failed. Falling back to local file storage.");
-            return await UploadToLocalAsync(file, userId, safeExtension, cancellationToken);
+            _logger.LogWarning(
+                ex,
+                "[UPLOAD][SERVICE_BLOB_FAIL] TraceId={TraceId}, ExceptionType={ExceptionType}. Falling back to local file storage.",
+                traceId,
+                ex.GetType().FullName);
+
+            // If upstream token is already canceled (for example client-side timeout),
+            // still attempt local fallback with a fresh token so upload can complete quickly.
+            var localWriteToken = cancellationToken.IsCancellationRequested ? CancellationToken.None : cancellationToken;
+            return await UploadToLocalAsync(file, userId, safeExtension, localWriteToken);
         }
     }
 
@@ -152,6 +192,13 @@ public class FileUploadService : IFileUploadService
             await file.CopyToAsync(stream, cancellationToken);
         }
 
+        _logger.LogInformation(
+            "[UPLOAD][SERVICE_LOCAL_SUCCESS] UserId={UserId}, DestinationPath={DestinationPath}, RelativeUrl={RelativeUrl}, Size={Size}",
+            userId,
+            destinationPath,
+            relativeUrl,
+            file.Length);
+
         return new FileUploadResponse
         {
             FileName = fileName,
@@ -174,7 +221,11 @@ public class FileUploadService : IFileUploadService
 
     private static bool IsStorageConnectivityIssue(Exception exception)
     {
-        if (exception is RequestFailedException)
+        if (exception is RequestFailedException
+            || exception is TaskCanceledException
+            || exception is TimeoutException
+            || exception is HttpRequestException
+            || exception is SocketException)
         {
             return true;
         }

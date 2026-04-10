@@ -199,11 +199,6 @@ public class PostsService : IPostsService
             return null;
         }
 
-        if (post.UserId == userId)
-        {
-            throw new InvalidOperationException("Không thể like bài viết của chính mình.");
-        }
-
         var existing = await _likesRepository.Query()
             .FirstOrDefaultAsync(l => l.PostId == id && l.UserId == userId);
 
