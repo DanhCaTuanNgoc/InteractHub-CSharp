@@ -10,17 +10,16 @@ import { NoticeModal } from '../shared/components/common/NoticeModal'
 import { PostCard } from '../shared/components/posts/PostCard'
 import { TextInput } from '../shared/components/common/TextInput'
 import { useAuth } from '../features/auth/hooks/useAuth'
+import { useStoriesQuery } from '../features/stories/hooks/useStoriesQuery'
 import { PostGrid } from './profile/PostGrid'
 import { ProfileHeader } from './profile/ProfileHeader'
 import { ProfileTabs, type ProfileTabKey } from './profile/ProfileTabs'
 import { friendService } from '../shared/services/friendService'
 import { postService } from '../shared/services/postService'
-import { storyService } from '../shared/services/storyService'
 import { uploadService } from '../shared/services/uploadService'
 import { userService } from '../shared/services/userService'
 import type { FriendshipRelationship } from '../shared/types/friendshipRelationship'
 import type { Post } from '../shared/types/post'
-import type { Story } from '../shared/types/story'
 import type { UserSummary } from '../shared/types/user'
 
 type ProfileFormValues = {
@@ -46,7 +45,6 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<UserSummary | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [userPosts, setUserPosts] = useState<Post[]>([])
-  const [userStories, setUserStories] = useState<Story[]>([])
   const [activityLoading, setActivityLoading] = useState(false)
   const [activityError, setActivityError] = useState<string | null>(null)
   const [relationship, setRelationship] = useState<FriendshipRelationship | null>(null)
@@ -67,6 +65,12 @@ export function ProfilePage() {
 
   const profileId = useMemo(() => (id === 'me' ? user?.id : id), [id, user?.id])
   const isOwnProfile = useMemo(() => profileId === user?.id, [profileId, user?.id])
+  const {
+    data: stories = [],
+    isLoading: storiesLoading,
+    error: storiesError,
+  } = useStoriesQuery({ enabled: Boolean(profileId) })
+  const userStories = useMemo(() => stories.filter((item) => item.user.id === profileId), [profileId, stories])
 
   const {
     register,
@@ -125,12 +129,10 @@ export function ProfilePage() {
       setActivityError(null)
 
       try {
-        const [feed, stories] = await Promise.all([postService.getFeed(1, 50), storyService.getAll()])
+        const feed = await postService.getFeed(1, 50)
         setUserPosts(feed.items.filter((item) => item.user.id === profileId))
-        setUserStories(stories.filter((item) => item.user.id === profileId))
       } catch (err) {
         setUserPosts([])
-        setUserStories([])
         setActivityError(err instanceof Error ? err.message : 'Không thể tải hoạt động của người dùng.')
       } finally {
         setActivityLoading(false)
@@ -479,6 +481,7 @@ export function ProfilePage() {
           <ProfileTabs activeTab={activeTab} onChange={setActiveTab} />
 
           {activityError ? <p className="form-error">{activityError}</p> : null}
+          {storiesError ? <p className="form-error">{storiesError instanceof Error ? storiesError.message : 'Không thể tải stories.'}</p> : null}
           {activityLoading ? <LoadingSkeleton lines={3} variant="post" /> : null}
 
           <AnimatePresence mode="wait">
@@ -503,9 +506,10 @@ export function ProfilePage() {
                 className="space-y-3"
               >
                 {!isOwnProfile ? <p className="text-sm text-slate-500">Bạn đang xem stories công khai của người dùng này.</p> : null}
-                {!activityLoading && userStories.length === 0 ? <p className="text-sm text-slate-500">Chưa có story nào đang hoạt động.</p> : null}
+                {storiesLoading ? <p className="text-sm text-slate-500">Đang tải stories...</p> : null}
+                {!storiesLoading && userStories.length === 0 ? <p className="text-sm text-slate-500">Chưa có story nào đang hoạt động.</p> : null}
 
-                {!activityLoading && userStories.length > 0 ? (
+                {!storiesLoading && userStories.length > 0 ? (
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                     {userStories.map((story, index) => (
                       <motion.article

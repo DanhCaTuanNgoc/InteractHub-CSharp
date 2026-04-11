@@ -9,17 +9,29 @@ namespace InteractHub.API.Services;
 public class StoriesService : IStoriesService
 {
     private readonly IRepository<Story> _storiesRepository;
+    private readonly IRepository<Friendship> _friendshipsRepository;
 
-    public StoriesService(IRepository<Story> storiesRepository)
+    public StoriesService(IRepository<Story> storiesRepository, IRepository<Friendship> friendshipsRepository)
     {
         _storiesRepository = storiesRepository;
+        _friendshipsRepository = friendshipsRepository;
     }
 
     public async Task<List<StoryResponse>> GetActiveStoriesAsync(string userId)
     {
+        var friendIds = await _friendshipsRepository.Query()
+            .Where(f =>
+                f.Status == FriendshipStatus.Accepted &&
+                (f.SenderId == userId || f.ReceiverId == userId))
+            .Select(f => f.SenderId == userId ? f.ReceiverId : f.SenderId)
+            .Distinct()
+            .ToListAsync();
+
+        friendIds.Add(userId);
+
         var stories = await _storiesRepository.Query()
             .Include(s => s.User)
-            .Where(s => s.ExpiresAt > DateTime.UtcNow && s.UserId == userId)
+            .Where(s => s.ExpiresAt > DateTime.UtcNow && friendIds.Contains(s.UserId))
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
 

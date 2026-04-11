@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Search, Sparkles, UsersRound } from 'lucide-react'
+import { Check, Search, Sparkles, UsersRound, X } from 'lucide-react'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { ROUTES } from '../shared/constants/routes'
 import { Avatar } from '../shared/components/common/Avatar'
@@ -11,7 +11,9 @@ import { Pagination } from '../shared/components/common/Pagination'
 import { TextInput } from '../shared/components/common/TextInput'
 import { useDebounce } from '../shared/hooks/useDebounce'
 import { friendService } from '../shared/services/friendService'
+import { notificationService } from '../shared/services/notificationService'
 import { userService } from '../shared/services/userService'
+import type { Notification } from '../shared/types/notification'
 import type { UserSummary } from '../shared/types/user'
 
 const PAGE_SIZE = 8
@@ -23,8 +25,11 @@ export function ExplorePage() {
   const [totalPages, setTotalPages] = useState(1)
   const [users, setUsers] = useState<UserSummary[]>([])
   const [friends, setFriends] = useState<UserSummary[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [friendActionBusyId, setFriendActionBusyId] = useState<string | null>(null)
+  const [requestBusyId, setRequestBusyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingRequests, setLoadingRequests] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const debouncedQuery = useDebounce(query, 300)
@@ -61,17 +66,24 @@ export function ExplorePage() {
   }, [debouncedQuery])
 
   useEffect(() => {
-    const loadFriends = async () => {
+    const loadRelations = async () => {
+      setLoadingRequests(true)
       try {
-        const items = await friendService.getFriends()
-        setFriends(items)
+        const [friendItems, notificationItems] = await Promise.all([friendService.getFriends(), notificationService.getAll()])
+        setFriends(friendItems)
+        setNotifications(notificationItems)
       } catch {
         setFriends([])
+        setNotifications([])
+      } finally {
+        setLoadingRequests(false)
       }
     }
 
-    void loadFriends()
+    void loadRelations()
   }, [])
+
+  const pendingRequests = notifications.filter((item) => item.type === 'FriendRequest' && !item.isRead)
 
   const isFriend = (userId: string) => friends.some((friend) => friend.id === userId)
 
@@ -97,6 +109,34 @@ export function ExplorePage() {
       setError(err instanceof Error ? err.message : 'Không thể hủy kết bạn.')
     } finally {
       setFriendActionBusyId(null)
+    }
+  }
+
+  const handleRequestDecision = async (request: Notification, action: 'accept' | 'decline') => {
+    setRequestBusyId(request.id)
+    setError(null)
+
+    try {
+      if (action === 'accept') {
+        await friendService.accept(request.sender.id)
+        setFriends((current) => {
+          if (current.some((friend) => friend.id === request.sender.id)) {
+            return current
+          }
+
+          return [request.sender, ...current]
+        })
+      } else {
+        await friendService.decline(request.sender.id)
+      }
+
+      await notificationService.markRead(request.id)
+      setNotifications((current) => current.map((item) => (item.id === request.id ? { ...item, isRead: true } : item)))
+      window.dispatchEvent(new Event('notifications:refresh'))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể xử lý lời mời kết bạn.')
+    } finally {
+      setRequestBusyId(null)
     }
   }
 
@@ -138,6 +178,63 @@ export function ExplorePage() {
           </div>
 
           {error ? <p className="form-error">{error}</p> : null}
+
+          {loadingRequests ? <p className="text-sm text-slate-500">Đang tải lời mời kết bạn...</p> : null}
+
+          {pendingRequests.length > 0 ? (
+            <section className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-sm">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <h2 className="text-base font-semibold text-slate-900">Lời mời kết bạn</h2>
+                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">{pendingRequests.length} đang chờ</span>
+              </div>
+              <p className="mb-3 text-xs text-slate-500">Bạn có thể chấp nhận hoặc từ chối ngay tại đây.</p>
+
+              <div className="grid grid-cols-1 gap-3">
+                {pendingRequests.map((request, index) => (
+                  <motion.article
+                    key={request.id}
+                    className="rounded-2xl border border-white/80 bg-white/90 p-4 shadow-sm"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, delay: index * 0.02 }}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <Link to={ROUTES.profile(request.sender.id)} className="flex min-w-0 flex-1 items-center gap-3">
+                        <Avatar src={request.sender.avatarUrl} alt={request.sender.fullName} size="md" />
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-semibold text-slate-900 sm:text-base">{request.sender.fullName}</h3>
+                          <p className="truncate text-xs text-slate-500">@{request.sender.userName}</p>
+                        </div>
+                      </Link>
+
+                      <div className="grid w-full grid-cols-2 gap-2 sm:w-auto">
+                        <Button
+                          type="button"
+                          variant="primary"
+                          busy={requestBusyId === request.id}
+                          onClick={() => void handleRequestDecision(request, 'accept')}
+                          className="justify-center rounded-xl px-3 py-2 text-sm"
+                        >
+                          <Check size={14} />
+                          Accept
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          busy={requestBusyId === request.id}
+                          onClick={() => void handleRequestDecision(request, 'decline')}
+                          className="justify-center rounded-xl px-3 py-2 text-sm"
+                        >
+                          <X size={14} />
+                          Decline
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.article>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {loading ? (
             <div className="grid gap-3 md:grid-cols-2">

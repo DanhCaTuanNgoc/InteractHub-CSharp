@@ -2,28 +2,47 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CalendarClock, Clapperboard, ImagePlus, Sparkles, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '../shared/components/common/Button'
-import { TextInput } from '../shared/components/common/TextInput'
+import { FileInput } from '../shared/components/common/FileInput'
 import { storyService } from '../shared/services/storyService'
+import { uploadService } from '../shared/services/uploadService'
 import type { Story } from '../shared/types/story'
 
 type StoryFormValues = {
-  mediaUrl: string
+  media: FileList
 }
 
 export function StoriesPage() {
+  const queryClient = useQueryClient()
   const [stories, setStories] = useState<Story[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<StoryFormValues>()
+
+  const mediaInput = watch('media')
+
+  useEffect(() => {
+    const file = mediaInput?.[0]
+    if (!file) {
+      setPreviewUrl(null)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(file)
+    setPreviewUrl(objectUrl)
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [mediaInput])
 
   useEffect(() => {
     const load = async () => {
@@ -47,9 +66,18 @@ export function StoriesPage() {
     setSubmitError(null)
 
     try {
-      const created = await storyService.create(values)
+      const selectedFile = values.media?.[0]
+      if (!selectedFile) {
+        setSubmitError('Vui lòng chọn ảnh trước khi đăng story.')
+        return
+      }
+
+      const uploaded = await uploadService.uploadImage(selectedFile)
+      const created = await storyService.create({ mediaUrl: uploaded.url })
       setStories((current) => [created, ...current])
+      await queryClient.invalidateQueries({ queryKey: ['stories'] })
       reset()
+      setPreviewUrl(null)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Không thể đăng story.')
     }
@@ -93,16 +121,18 @@ export function StoriesPage() {
           </div>
 
           <form className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm" onSubmit={onSubmit}>
-            <TextInput
-              label="Media URL"
-              className="rounded-2xl border-slate-200 bg-white/95 shadow-sm"
-              placeholder="https://..."
-              error={errors.mediaUrl?.message}
-              {...register('mediaUrl', {
-                required: 'Media URL là bắt buộc.',
-                pattern: {
-                  value: /^https?:\/\/.+/i,
-                  message: 'Media URL phải bắt đầu bằng http hoặc https.',
+            <FileInput
+              label="Chọn ảnh story"
+              accept="image/*"
+              previewUrl={previewUrl}
+              error={errors.media?.message}
+              {...register('media', {
+                validate: (fileList) => {
+                  if (!fileList || fileList.length === 0) {
+                    return 'Vui lòng chọn ảnh story.'
+                  }
+
+                  return true
                 },
               })}
             />

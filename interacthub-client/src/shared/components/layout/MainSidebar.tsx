@@ -1,4 +1,4 @@
-import { Clapperboard, Compass, Home, PlusSquare, Shield, User } from 'lucide-react'
+import { Clapperboard, Compass, Home, PlusSquare, Shield, User, UserRoundPlus } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 
@@ -10,6 +10,7 @@ type MainSidebarProps = {
 const navItems = [
   { to: ROUTES.home, label: 'Feed', icon: Home },
   { to: ROUTES.explore, label: 'Explore', icon: Compass },
+  { to: ROUTES.friendRequests, label: 'Friend Requests', icon: UserRoundPlus },
   { to: ROUTES.stories, label: 'Stories', icon: Clapperboard },
   { to: ROUTES.profile('me'), label: 'Profile', icon: User },
 ]

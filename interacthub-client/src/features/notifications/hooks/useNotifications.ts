@@ -70,6 +70,15 @@ export function useNotifications() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    const handleRefresh = () => {
+      void load()
+    }
+
+    window.addEventListener('notifications:refresh', handleRefresh)
+    return () => window.removeEventListener('notifications:refresh', handleRefresh)
+  }, [load])
+
   return {
     notifications,
     unreadCount,

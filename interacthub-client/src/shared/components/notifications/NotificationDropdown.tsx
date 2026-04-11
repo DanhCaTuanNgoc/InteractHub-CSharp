@@ -130,22 +130,22 @@ export function NotificationDropdown({ triggerIcon }: NotificationDropdownProps)
         className="ui-interactive ui-ripple-static relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200/70 bg-white/70 text-ink-700 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80 dark:text-ink-100"
       >
         {triggerIcon ?? <Bell size={16} />}
-
-        <AnimatePresence initial={false}>
-          {unreadCount > 0 ? (
-            <motion.span
-              key={badge}
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: [1, 1.18, 1], opacity: 1 }}
-              exit={{ scale: 0.7, opacity: 0 }}
-              transition={{ duration: 0.24, ease: 'easeOut' }}
-              className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white"
-            >
-              {badge}
-            </motion.span>
-          ) : null}
-        </AnimatePresence>
       </button>
+
+      <AnimatePresence initial={false}>
+        {unreadCount > 0 ? (
+          <motion.span
+            key={badge}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: [1, 1.18, 1], opacity: 1 }}
+            exit={{ scale: 0.7, opacity: 0 }}
+            transition={{ duration: 0.24, ease: 'easeOut' }}
+            className="pointer-events-none absolute -right-1.5 -top-1.5 z-10 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1.5 text-[10px] font-bold leading-none tabular-nums text-white"
+          >
+            {badge}
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {open ? (

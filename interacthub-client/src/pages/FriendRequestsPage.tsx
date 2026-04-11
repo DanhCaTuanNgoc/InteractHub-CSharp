@@ -51,6 +51,7 @@ export function FriendRequestsPage() {
 
       await notificationService.markRead(notification.id)
       setNotifications((current) => current.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)))
+      window.dispatchEvent(new Event('notifications:refresh'))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể xử lý lời mời kết bạn.')
     } finally {
