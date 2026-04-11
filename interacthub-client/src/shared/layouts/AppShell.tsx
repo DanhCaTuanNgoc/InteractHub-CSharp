@@ -2,13 +2,14 @@ import { Bell, LogOut } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../features/auth/hooks/useAuth'
-import { NotificationBell } from '../components/notifications/NotificationBell'
+import { NotificationDropdown } from '../components/notifications/NotificationDropdown'
 import { MainSidebar } from '../components/layout/MainSidebar'
 import { RightPanel } from '../components/layout/RightPanel'
 import { useState } from 'react'
 import { CreatePostModal } from '../components/feed/CreatePostModal'
 import { useInfinitePosts } from '../../features/posts/hooks/useInfinitePosts'
 import { ROUTES } from '../constants/routes'
+import { LazyImage } from '../components/common/LazyImage'
 
 export function AppShell() {
   const location = useLocation()
@@ -30,11 +31,11 @@ export function AppShell() {
           <div className="ml-auto flex items-center gap-2">
             <Link
               to={ROUTES.profile(user?.id ?? 'me')}
-              className="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink-200/70 bg-white/70 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80"
+              className="ui-interactive ui-ripple-static inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink-200/70 bg-white/70 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80"
               aria-label="Go to profile"
             >
               {user?.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" loading="lazy" />
+                <LazyImage src={user.avatarUrl} alt={user.fullName} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />
               ) : (
                 <span className="text-sm font-semibold text-ink-700 dark:text-ink-100">
                   {(user?.fullName ?? user?.username ?? 'U').slice(0, 1).toUpperCase()}
@@ -43,11 +44,11 @@ export function AppShell() {
             </Link>
 
             {/* <ThemeToggle isDark={isDark} onToggle={toggleTheme} /> */}
-            <NotificationBell triggerIcon={<Bell size={16} />} />
+            <NotificationDropdown triggerIcon={<Bell size={16} />} />
             <button
               type="button"
               onClick={logout}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200/70 bg-white/70 text-ink-700 transition hover:bg-red-50 hover:text-red-600 dark:border-ink-700 dark:bg-ink-900/75 dark:text-ink-200 dark:hover:bg-red-900/20"
+              className="ui-interactive ui-ripple-static inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200/70 bg-white/70 text-ink-700 transition hover:bg-red-50 hover:text-red-600 dark:border-ink-700 dark:bg-ink-900/75 dark:text-ink-200 dark:hover:bg-red-900/20"
               aria-label="Logout"
             >
               <LogOut size={16} />

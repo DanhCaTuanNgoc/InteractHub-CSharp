@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import type { Post } from '../../types/post'
+import { LazyImage } from '../common/LazyImage'
 
 type FeedPostCardProps = {
   post: Post
@@ -23,10 +24,10 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
     >
       <header className="mb-4 flex items-center justify-between gap-3">
         <Link to={ROUTES.profile(post.user.id)} className="flex items-center gap-3">
-          <img
+          <LazyImage
             src={post.user.avatarUrl ?? '/favicon.ico'}
             alt={post.user.fullName}
-            loading="lazy"
+            wrapperClassName="h-10 w-10 overflow-hidden rounded-full"
             className="h-10 w-10 rounded-full object-cover"
           />
           <div>
@@ -40,10 +41,10 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
       {post.content ? <p className="mb-4 whitespace-pre-wrap text-sm text-ink-700 dark:text-ink-200">{post.content}</p> : null}
 
       {post.imageUrl ? (
-        <img
+        <LazyImage
           src={post.imageUrl}
           alt="Post"
-          loading="lazy"
+          wrapperClassName="w-full overflow-hidden rounded-2xl"
           className="h-auto max-h-[420px] w-full rounded-2xl object-cover"
         />
       ) : null}
@@ -51,10 +52,10 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
       {originalPost ? (
         <section className="mt-3 rounded-2xl border border-ink-200/80 bg-white/70 p-3 dark:border-ink-700 dark:bg-ink-800/70">
           <Link to={ROUTES.profile(originalPost.user.id)} className="mb-2 inline-flex items-center gap-2">
-            <img
+            <LazyImage
               src={originalPost.user.avatarUrl ?? '/favicon.ico'}
               alt={originalPost.user.fullName}
-              loading="lazy"
+              wrapperClassName="h-7 w-7 overflow-hidden rounded-full"
               className="h-7 w-7 rounded-full object-cover"
             />
             <span className="text-xs font-semibold text-ink-700 dark:text-ink-200">Bài viết gốc của {originalPost.user.fullName}</span>
@@ -67,10 +68,10 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
           )}
 
           {originalPost.imageUrl ? (
-            <img
+            <LazyImage
               src={originalPost.imageUrl}
               alt="Original post"
-              loading="lazy"
+              wrapperClassName="mt-3 w-full overflow-hidden rounded-xl"
               className="mt-3 h-auto max-h-[360px] w-full rounded-xl object-cover"
             />
           ) : null}
@@ -81,7 +82,7 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
         <button
           type="button"
           onClick={() => onLike(post.id)}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
+          className="ui-interactive ui-ripple-static inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
         >
           <Heart size={16} />
           {post.likeCount}
@@ -90,7 +91,7 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
         <button
           type="button"
           onClick={() => onOpenComments(post)}
-          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
+          className="ui-interactive ui-ripple-static inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
         >
           <MessageCircle size={16} />
           {post.commentCount} bình luận

@@ -1,151 +1,107 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useInfiniteQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import { postService } from '../../../shared/services/postService'
+import type { PagedResult } from '../../../shared/types/api'
 import type { Post } from '../../../shared/types/post'
 
-const PAGE_SIZE = 5
+const PAGE_SIZE = 6
 
-export function usePosts() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalPosts, setTotalPosts] = useState(0)
+type FeedInfiniteData = InfiniteData<PagedResult<Post>, number>
 
-  const fetchPosts = useCallback(async (page: number, force = false) => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      if (force) {
-        postService.invalidateFeedCache()
-      }
-      const feed = await postService.getFeed(page, PAGE_SIZE)
-      setPosts(feed.items)
-      setCurrentPage(feed.page)
-      setTotalPages(feed.totalPages)
-      setTotalPosts(feed.totalCount)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải feed.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    void fetchPosts(currentPage)
-  }, [currentPage, fetchPosts])
-
-  const createPost = useCallback(async (content: string, imageUrl?: string) => {
-    setSaving(true)
-    setError(null)
-
-    try {
-      await postService.create({ content, imageUrl })
-      postService.invalidateFeedCache()
-      setCurrentPage(1)
-      await fetchPosts(1, true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tạo bài viết.')
-      throw err
-    } finally {
-      setSaving(false)
-    }
-  }, [fetchPosts])
-
-  const toggleLike = useCallback(async (postId: string) => {
-    try {
-      const updated = await postService.toggleLike(postId)
-      setPosts((current) => current.map((post) => (post.id === postId ? updated : post)))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể cập nhật lượt thích.')
-    }
-  }, [])
-
-  const addComment = useCallback(async (postId: string, content: string) => {
-    try {
-      const created = await postService.addComment(postId, content)
-      setPosts((current) =>
-        current.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                commentCount: post.commentCount + 1,
-                recentComments: [created, ...post.recentComments].slice(0, 3),
-              }
-            : post,
-        ),
-      )
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể thêm bình luận.')
-      throw err
-    }
-  }, [])
-
-  const sharePost = useCallback(async (postId: string) => {
-    try {
-      const shared = await postService.share(postId)
-      postService.invalidateFeedCache()
-      setPosts((current) => [shared, ...current])
-      setTotalPosts((current) => current + 1)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể chia sẻ bài viết.')
-      throw err
-    }
-  }, [])
-
-  const reportPost = useCallback(async (postId: string, reason: string) => {
-    try {
-      await postService.report(postId, reason)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể report bài viết.')
-      throw err
-    }
-  }, [])
-
-  const deletePost = useCallback(async (postId: string) => {
-    try {
-      await postService.remove(postId)
-      postService.invalidateFeedCache()
-      setPosts((current) => current.filter((post) => post.id !== postId))
-      setTotalPosts((current) => Math.max(0, current - 1))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể xóa bài viết.')
-      throw err
-    }
-  }, [])
-
-  const updatePost = useCallback(async (postId: string, content: string) => {
-    try {
-      const updated = await postService.update(postId, { content })
-      postService.invalidateFeedCache()
-      setPosts((current) => current.map((post) => (post.id === postId ? updated : post)))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể cập nhật bài viết.')
-      throw err
-    }
-  }, [])
-
-  const hasPosts = useMemo(() => posts.length > 0, [posts.length])
+function updatePostInFeedData(
+  data: FeedInfiniteData | undefined,
+  postId: string,
+  updater: (post: Post) => Post,
+): FeedInfiniteData | undefined {
+  if (!data) {
+    return data
+  }
 
   return {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      items: page.items.map((post) => (post.id === postId ? updater(post) : post)),
+    })),
+  }
+}
+
+export function usePosts() {
+  const queryClient = useQueryClient()
+
+  const feedQuery = useInfiniteQuery({
+    queryKey: ['feed', PAGE_SIZE],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => postService.getFeed(pageParam, PAGE_SIZE),
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page >= lastPage.totalPages) {
+        return undefined
+      }
+      return lastPage.page + 1
+    },
+  })
+
+  const createPostMutation = useMutation({
+    mutationFn: ({ content, imageUrl }: { content: string; imageUrl?: string }) =>
+      postService.create({ content, imageUrl }),
+    onSuccess: () => {
+      postService.invalidateFeedCache()
+      void queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+
+  const toggleLikeMutation = useMutation({
+    mutationFn: (postId: string) => postService.toggleLike(postId),
+    onMutate: async (postId) => {
+      await queryClient.cancelQueries({ queryKey: ['feed'] })
+      const previousEntries = queryClient.getQueriesData<FeedInfiniteData>({ queryKey: ['feed'] })
+
+      previousEntries.forEach(([queryKey, data]) => {
+        queryClient.setQueryData<FeedInfiniteData>(queryKey, () =>
+          updatePostInFeedData(data, postId, (post) => ({
+            ...post,
+            likeCount: Math.max(0, post.likeCount + 1),
+          })),
+        )
+      })
+
+      return { previousEntries }
+    },
+    onError: (_error, _postId, context) => {
+      if (!context?.previousEntries) {
+        return
+      }
+
+      context.previousEntries.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data)
+      })
+    },
+    onSuccess: (updatedPost, postId) => {
+      queryClient.setQueriesData<FeedInfiniteData>({ queryKey: ['feed'] }, (data) =>
+        updatePostInFeedData(data, postId, () => updatedPost),
+      )
+    },
+    onSettled: () => {
+      postService.invalidateFeedCache()
+      void queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+
+  const addCommentMutation = useMutation({
+    mutationFn: ({ postId, content }: { postId: string; content: string }) =>
+      postService.addComment(postId, content),
+    onSuccess: () => {
+      postService.invalidateFeedCache()
+      void queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+
+  const posts = feedQuery.data?.pages.flatMap((page) => page.items) ?? []
+
+  return {
+    ...feedQuery,
     posts,
-    totalPosts,
-    totalPages,
-    currentPage,
-    loading,
-    saving,
-    hasPosts,
-    error,
-    setCurrentPage,
-    fetchPosts,
-    createPost,
-    toggleLike,
-    addComment,
-    sharePost,
-    reportPost,
-    deletePost,
-    updatePost,
+    createPost: createPostMutation,
+    toggleLike: toggleLikeMutation,
+    addComment: addCommentMutation,
   }
 }

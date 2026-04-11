@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { connectNotificationHub, disconnectNotificationHub } from '../../../shared/services/signalRService'
 import { notificationService } from '../../../shared/services/notificationService'
 import type { Notification } from '../../../shared/types/notification'
+import { useNotificationSignalR } from './useNotificationSignalR'
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -54,34 +54,20 @@ export function useNotifications() {
     }
   }, [])
 
+  const appendNotification = useCallback((payload: Notification) => {
+    setNotifications((current) => {
+      const unique = current.filter((item) => item.id !== payload.id)
+      return [payload, ...unique]
+    })
+  }, [])
+
+  useNotificationSignalR({
+    onNotification: appendNotification,
+    onError: (message) => setError(message),
+  })
+
   useEffect(() => {
-    let mounted = true
-
-    const start = async () => {
-      try {
-        await load()
-        const connection = await connectNotificationHub()
-
-        if (!mounted || !connection) {
-          return
-        }
-
-        connection.on('ReceiveNotification', (payload: Notification) => {
-          setNotifications((current) => [payload, ...current])
-        })
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Không thể kết nối thông báo thời gian thực.')
-        }
-      }
-    }
-
-    void start()
-
-    return () => {
-      mounted = false
-      void disconnectNotificationHub()
-    }
+    void load()
   }, [load])
 
   return {

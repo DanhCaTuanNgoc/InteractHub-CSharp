@@ -1,3 +1,5 @@
+import { LazyImage } from './LazyImage'
+
 type AvatarProps = {
   src?: string | null
   alt: string
@@ -8,7 +10,7 @@ export function Avatar({ src, alt, size = 'md' }: AvatarProps) {
   const classes = `avatar avatar--${size}`
 
   if (src) {
-    return <img src={src} alt={alt} className={classes} />
+    return <LazyImage src={src} alt={alt} className="h-full w-full rounded-[inherit] object-cover" wrapperClassName={classes} />
   }
 
   return (

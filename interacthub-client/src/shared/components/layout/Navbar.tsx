@@ -4,7 +4,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../../../features/auth/hooks/useAuth'
 import { ROUTES } from '../../constants/routes'
 import { Button } from '../common/Button'
-import { NotificationBell } from '../notifications/NotificationBell'
+import { NotificationDropdown } from '../notifications/NotificationDropdown'
 
 const navItems = [
   { to: ROUTES.home, label: 'Trang chủ', icon: House },
@@ -79,7 +79,7 @@ export function Navbar() {
             <UserRound size={14} aria-hidden="true" />
             <span>{user?.fullName ?? user?.username ?? 'Member'}</span>
           </div>
-          <NotificationBell />
+          <NotificationDropdown />
           <Button
             type="button"
             variant="ghost"
