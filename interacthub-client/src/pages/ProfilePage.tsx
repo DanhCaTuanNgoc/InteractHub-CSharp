@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AtSign, Check, Clapperboard, Clock3, Mail, Newspaper, Save, UserRoundCheck, UserRoundPen, UserRoundPlus, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Save, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
-import { Avatar } from '../shared/components/common/Avatar'
 import { Button } from '../shared/components/common/Button'
 import { FileInput } from '../shared/components/common/FileInput'
 import { LoadingSkeleton } from '../shared/components/common/LoadingSkeleton'
@@ -10,6 +10,9 @@ import { NoticeModal } from '../shared/components/common/NoticeModal'
 import { PostCard } from '../shared/components/posts/PostCard'
 import { TextInput } from '../shared/components/common/TextInput'
 import { useAuth } from '../features/auth/hooks/useAuth'
+import { PostGrid } from './profile/PostGrid'
+import { ProfileHeader } from './profile/ProfileHeader'
+import { ProfileTabs, type ProfileTabKey } from './profile/ProfileTabs'
 import { friendService } from '../shared/services/friendService'
 import { postService } from '../shared/services/postService'
 import { storyService } from '../shared/services/storyService'
@@ -36,6 +39,7 @@ type NoticeState = {
 export function ProfilePage() {
   const { id } = useParams()
   const { user } = useAuth()
+  const [activeTab, setActiveTab] = useState<ProfileTabKey>('posts')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -49,6 +53,7 @@ export function ProfilePage() {
   const [relationshipLoading, setRelationshipLoading] = useState(false)
   const [relationshipBusy, setRelationshipBusy] = useState(false)
   const [relationshipError, setRelationshipError] = useState<string | null>(null)
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [notice, setNotice] = useState<NoticeState>({
     open: false,
     type: 'info',
@@ -345,12 +350,36 @@ export function ProfilePage() {
     }
   }, [isOwnProfile, relationship?.status])
 
+  useEffect(() => {
+    if (!selectedPost) {
+      return
+    }
+
+    const latest = userPosts.find((post) => post.id === selectedPost.id)
+    setSelectedPost(latest ?? null)
+  }, [selectedPost, userPosts])
+
+  const scrollToProfileEditor = () => {
+    if (!isOwnProfile) {
+      return
+    }
+
+    document.getElementById('profile-edit-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
+  const handleDeletePost = async (postId: string) => {
+    await deletePost(postId)
+    setSelectedPost(null)
+  }
+
   if (loading) {
     return <LoadingSkeleton lines={5} variant="user" />
   }
 
   return (
-    <section className="cards-section cards-section--single profile-page mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+    <section className="relative space-y-5 px-1 py-2 sm:py-4">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-cyan-50 via-sky-50/60 to-transparent" />
+
       <NoticeModal
         open={notice.open}
         type={notice.type}
@@ -359,179 +388,193 @@ export function ProfilePage() {
         onClose={() => setNotice((current) => ({ ...current, open: false }))}
       />
 
-      <article className="status-card profile-card profile-hero-card p-4 sm:p-5 lg:p-6">
-        <div className="profile-hero">
-          <div className="profile-hero__identity">
-            <Avatar src={previewUrl ?? profile?.avatarUrl ?? null} alt={profile?.fullName ?? 'User avatar'} size="lg" />
+      <div className="relative z-10">
+        <ProfileHeader
+          profile={profile}
+          isOwnProfile={isOwnProfile}
+          onEditProfile={scrollToProfileEditor}
+          postCount={userPosts.length}
+          storyCount={userStories.length}
+          relationship={relationship}
+          relationshipLoading={relationshipLoading}
+          relationshipBusy={relationshipBusy}
+          relationshipLabel={relationshipLabel}
+          relationshipError={relationshipError}
+          onSendRequest={() => void handleRelationshipAction('send')}
+          onAcceptRequest={() => void handleRelationshipAction('accept')}
+          onDeclineRequest={() => void handleRelationshipAction('decline')}
+          onRemoveFriend={() => void handleRelationshipAction('remove')}
+        />
+      </div>
 
-            <div className="profile-hero__meta">
-              <p className="profile-hero__eyebrow">Social Profile</p>
-              <h1 className="title-with-icon">
-                <UserRoundPen size={20} aria-hidden="true" />
-                <span>{profile?.fullName ?? 'Profile'}</span>
-              </h1>
-
-              <div className="profile-hero__chips">
-                <span>
-                  <AtSign size={14} aria-hidden="true" />
-                  {profile?.userName ?? 'username'}
-                </span>
-                <span>
-                  <Mail size={14} aria-hidden="true" />
-                  {profile?.email ?? 'email'}
-                </span>
-              </div>
-
-              <p>{profile?.bio?.trim() ? profile.bio : 'Chưa có bio. Hãy thêm mô tả ngắn để hồ sơ nổi bật hơn.'}</p>
+      {isOwnProfile ? (
+        <motion.article
+          id="profile-edit-form"
+          className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.06 }}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-cyan-100/30" />
+          <form className="relative z-10 space-y-4" onSubmit={onSubmit} noValidate>
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Edit profile details</h2>
+              <p className="mt-1 text-sm text-slate-500">Update your public information and profile photo.</p>
             </div>
-          </div>
-
-          <div className="profile-hero__stats" aria-label="Profile statistics">
-            <article>
-              <strong>{userPosts.length}</strong>
-              <span>Bài đăng</span>
-            </article>
-            <article>
-              <strong>{userStories.length}</strong>
-              <span>Stories</span>
-            </article>
-            <article>
-              <strong>{relationshipLabel}</strong>
-              <span>Chế độ hồ sơ</span>
-            </article>
-          </div>
-        </div>
-
-        {isOwnProfile ? (
-          <form className="auth-form profile-editor" onSubmit={onSubmit} noValidate>
-            <h2>Chỉnh sửa hồ sơ</h2>
 
             {error ? <p className="form-error">{error}</p> : null}
 
-            <TextInput
-              label="Họ tên"
-              error={errors.fullName?.message}
-              {...register('fullName', {
-                required: 'Họ tên là bắt buộc.',
-                minLength: { value: 2, message: 'Họ tên tối thiểu 2 ký tự.' },
-              })}
-            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="md:col-span-1">
+                <TextInput
+                  label="Họ tên"
+                  className="rounded-2xl border-slate-200 bg-white/80 shadow-sm"
+                  error={errors.fullName?.message}
+                  {...register('fullName', {
+                    required: 'Họ tên là bắt buộc.',
+                    minLength: { value: 2, message: 'Họ tên tối thiểu 2 ký tự.' },
+                  })}
+                />
+              </div>
 
-            <TextInput
-              label="Bio"
-              error={errors.bio?.message}
-              {...register('bio', {
-                maxLength: { value: 280, message: 'Bio tối đa 280 ký tự.' },
-              })}
-            />
+              <div className="md:col-span-1">
+                <TextInput
+                  label="Bio"
+                  className="rounded-2xl border-slate-200 bg-white/80 shadow-sm"
+                  error={errors.bio?.message}
+                  {...register('bio', {
+                    maxLength: { value: 280, message: 'Bio tối đa 280 ký tự.' },
+                  })}
+                />
+              </div>
+            </div>
 
-            <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
+            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+              <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
+            </div>
 
             {submitError ? <p className="form-error">{submitError}</p> : null}
 
-            <Button type="submit" busy={isSubmitting}>
+            <Button
+              type="submit"
+              busy={isSubmitting}
+              className="rounded-2xl bg-slate-900 px-4 py-2.5 text-white shadow-sm transition hover:bg-slate-800 hover:shadow-lg"
+            >
               <Save size={15} aria-hidden="true" />
-              Lưu thay đổi
+              Save change
             </Button>
           </form>
-        ) : (
-          <div className="auth-form profile-editor" role="status" aria-live="polite">
-            <h2>Kết nối</h2>
-            <p>Bạn đang xem hồ sơ của người dùng khác.</p>
+        </motion.article>
+      ) : null}
 
-            {relationshipLoading ? <p>Đang tải trạng thái kết bạn...</p> : null}
-            {relationshipError ? <p className="form-error">{relationshipError}</p> : null}
+      <motion.article
+        className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/70 p-4 shadow-sm backdrop-blur-xl sm:p-5"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1 }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 to-sky-50/40" />
 
-            {!relationshipLoading ? (
-              <p className="profile-relationship-status">Trạng thái hiện tại: {relationshipLabel}</p>
-            ) : null}
-
-            {!relationshipLoading && relationship?.status === 'NotFriends' ? (
-              <Button type="button" variant="ghost" busy={relationshipBusy} onClick={() => void handleRelationshipAction('send')}>
-                <UserRoundPlus size={15} aria-hidden="true" />
-                Gửi lời mời kết bạn
-              </Button>
-            ) : null}
-
-            {!relationshipLoading && relationship?.status === 'RequestSent' ? (
-              <Button type="button" variant="ghost" disabled>
-                <Clock3 size={15} aria-hidden="true" />
-                Đã gửi lời mời
-              </Button>
-            ) : null}
-
-            {!relationshipLoading && relationship?.status === 'RequestReceived' ? (
-              <div className="profile-relationship-actions">
-                <Button type="button" variant="primary" busy={relationshipBusy} onClick={() => void handleRelationshipAction('accept')}>
-                  <Check size={15} aria-hidden="true" />
-                  Chấp nhận
-                </Button>
-                <Button type="button" variant="danger" busy={relationshipBusy} onClick={() => void handleRelationshipAction('decline')}>
-                  <X size={15} aria-hidden="true" />
-                  Từ chối
-                </Button>
-              </div>
-            ) : null}
-
-            {!relationshipLoading && relationship?.status === 'Friends' ? (
-              <Button type="button" variant="danger" busy={relationshipBusy} onClick={() => void handleRelationshipAction('remove')}>
-                <UserRoundCheck size={15} aria-hidden="true" />
-                Hủy kết bạn
-              </Button>
-            ) : null}
-          </div>
-        )}
-      </article>
-
-      <article className="status-card profile-activity p-4 sm:p-5 lg:p-6">
-        <div className="profile-activity__section">
-          <h2 className="title-with-icon">
-            <Newspaper size={18} aria-hidden="true" />
-            <span>Bài đăng của người dùng</span>
-          </h2>
+        <div className="relative z-10 space-y-4">
+          <ProfileTabs activeTab={activeTab} onChange={setActiveTab} />
 
           {activityError ? <p className="form-error">{activityError}</p> : null}
           {activityLoading ? <LoadingSkeleton lines={3} variant="post" /> : null}
-          {!activityLoading && userPosts.length === 0 ? <p>Chưa có bài đăng nào.</p> : null}
 
-          <div className="profile-post-list">
-            {userPosts.map((post) => (
+          <AnimatePresence mode="wait">
+            {activeTab === 'posts' ? (
+              <motion.div
+                key="tab-posts"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22 }}
+              >
+                {!activityLoading && userPosts.length === 0 ? <p className="text-sm text-slate-500">Chưa có bài đăng nào.</p> : null}
+                {!activityLoading && userPosts.length > 0 ? <PostGrid posts={userPosts} onOpenPost={setSelectedPost} /> : null}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="tab-stories"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22 }}
+                className="space-y-3"
+              >
+                {!isOwnProfile ? <p className="text-sm text-slate-500">Bạn đang xem stories công khai của người dùng này.</p> : null}
+                {!activityLoading && userStories.length === 0 ? <p className="text-sm text-slate-500">Chưa có story nào đang hoạt động.</p> : null}
+
+                {!activityLoading && userStories.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                    {userStories.map((story, index) => (
+                      <motion.article
+                        key={story.id}
+                        className="group relative aspect-square overflow-hidden rounded-2xl bg-slate-100 shadow-sm transition-shadow hover:shadow-lg"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.26, delay: index * 0.04 }}
+                      >
+                        <motion.img
+                          src={story.mediaUrl}
+                          alt="User story"
+                          className="h-full w-full object-cover"
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.24, ease: 'easeOut' }}
+                        />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-xs text-white">
+                          {new Date(story.createdAt).toLocaleString()}
+                        </div>
+                      </motion.article>
+                    ))}
+                  </div>
+                ) : null}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.article>
+
+      <AnimatePresence>
+        {selectedPost ? (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedPost(null)}
+          >
+            <motion.div
+              className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/50 bg-white p-3 shadow-2xl sm:p-5"
+              initial={{ opacity: 0, y: 20, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: 0.24 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                aria-label="Close post"
+                onClick={() => setSelectedPost(null)}
+                className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm"
+              >
+                <X size={16} />
+              </button>
+
               <PostCard
-                key={post.id}
-                post={post}
+                post={selectedPost}
                 currentUserId={user?.id}
                 onLike={toggleLike}
                 onComment={addComment}
                 onShare={sharePost}
                 onReport={reportPost}
-                onDelete={deletePost}
+                onDelete={handleDeletePost}
                 onUpdate={updatePost}
               />
-            ))}
-          </div>
-        </div>
-
-        <div className="profile-activity__section">
-          <h2 className="title-with-icon">
-            <Clapperboard size={18} aria-hidden="true" />
-            <span>Stories của người dùng</span>
-          </h2>
-
-          {!isOwnProfile ? <p>Story hiện chỉ khả dụng với hồ sơ của bạn trong phiên bản API hiện tại.</p> : null}
-          {isOwnProfile && !activityLoading && userStories.length === 0 ? <p>Bạn chưa có story nào đang hoạt động.</p> : null}
-
-          {isOwnProfile ? (
-            <div className="profile-story-grid">
-              {userStories.map((story) => (
-                <article key={story.id} className="profile-story-item">
-                  <img src={story.mediaUrl} alt="User story" />
-                  <small>{new Date(story.createdAt).toLocaleString()}</small>
-                </article>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </article>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   )
 }
