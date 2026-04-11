@@ -5,6 +5,7 @@ export type AuthUser = {
   id: string
   username: string
   fullName: string
+  avatarUrl?: string | null
   roles: string[]
 }
 
@@ -37,6 +38,7 @@ export function getStoredUser(): AuthUser | null {
       id: typeof parsed.id === 'string' ? parsed.id : '',
       username: typeof parsed.username === 'string' ? parsed.username : '',
       fullName: typeof parsed.fullName === 'string' ? parsed.fullName : '',
+      avatarUrl: typeof parsed.avatarUrl === 'string' ? parsed.avatarUrl : null,
       roles: Array.isArray(parsed.roles)
         ? parsed.roles.filter((value): value is string => typeof value === 'string')
         : [],

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Merriweather:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&family=Merriweather:wght@400;700;900&family=Sora:wght@500;600;700&display=swap');
 
 @import 'tailwindcss';
 
@@ -541,11 +541,12 @@ p {
 
 .post-card__image {
   width: 100%;
-  max-height: min(56vh, 440px);
-  object-fit: cover;
+  max-height: 440px;
+  object-fit: contain; /* đổi từ cover -> contain */
   object-position: center;
   border-radius: 12px;
   border: 1px solid var(--line);
+  background-color: #f5f5f5; /* tránh khoảng trống bị trắng */
 }
 
 .post-card__actions {
@@ -1853,3 +1854,86 @@ p {
     width: 100%;
   }
 }
+
+  @custom-variant dark (&:where(.dark, .dark *));
+
+  @theme {
+    --color-brand-50: #eefaf8;
+    --color-brand-100: #cff4ef;
+    --color-brand-300: #6fd7cb;
+    --color-brand-500: #0f766e;
+    --color-brand-600: #0d5f59;
+    --color-ink-50: #f6f8f9;
+    --color-ink-100: #e8ecee;
+    --color-ink-200: #d7dee1;
+    --color-ink-300: #b0bcc2;
+    --color-ink-400: #82929a;
+    --color-ink-500: #5f6e76;
+    --color-ink-600: #45535b;
+    --color-ink-700: #303d45;
+    --color-ink-800: #1f2a31;
+    --color-ink-900: #121a20;
+    --font-sans: 'Manrope', 'Segoe UI', sans-serif;
+    --font-title: 'Sora', 'Segoe UI', sans-serif;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background:
+      radial-gradient(circle at 8% 10%, rgba(15, 118, 110, 0.14), transparent 28%),
+      radial-gradient(circle at 92% 0%, rgba(245, 158, 11, 0.12), transparent 30%),
+      linear-gradient(165deg, #f8fbfc 0%, #f0f4f6 100%);
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at 8% 10%, rgba(15, 118, 110, 0.2), transparent 28%),
+      radial-gradient(circle at 92% 0%, rgba(245, 158, 11, 0.15), transparent 30%),
+      linear-gradient(165deg, #0f151a 0%, #151e24 100%);
+  }
+
+  .font-title {
+    font-family: var(--font-title);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 14px 34px rgba(17, 31, 41, 0.08);
+  }
+
+  .shadow-soft-xl {
+    box-shadow: 0 22px 48px rgba(14, 24, 32, 0.24);
+  }
+
+  .bg-gradient-brand {
+    background-image: linear-gradient(135deg, #0f766e 0%, #14968c 62%, #1baaa0 100%);
+  }
+
+  .bg-grid-soft {
+    background-image:
+      linear-gradient(to right, rgba(94, 115, 128, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(94, 115, 128, 0.08) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }

@@ -1,18 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Bell, CheckCheck, RotateCcw } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Bell, CheckCheck } from 'lucide-react'
 import { useNotifications } from '../../../features/notifications/hooks/useNotifications'
-import { Button } from '../common/Button'
 
-export function NotificationBell() {
+type NotificationBellProps = {
+  triggerIcon?: ReactNode
+}
+
+export function NotificationBell({ triggerIcon }: NotificationBellProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const { notifications, unreadCount, loading, markingAllRead, error, reload, markRead, markAllRead } = useNotifications()
+  const { notifications, unreadCount, loading, markingAllRead, error, markRead, markAllRead } = useNotifications()
 
-  const previewNotifications = useMemo(() => notifications.slice(0, 8), [notifications])
-  const unreadLabel = unreadCount > 99 ? '99+' : unreadCount
+  const items = useMemo(() => notifications.slice(0, 8), [notifications])
+  const badge = unreadCount > 99 ? '99+' : unreadCount
 
   useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
+    const onMouseDown = (event: MouseEvent) => {
       if (!containerRef.current) {
         return
       }
@@ -22,103 +26,89 @@ export function NotificationBell() {
       }
     }
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleOutsideClick)
-    document.addEventListener('keydown', handleEscape)
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
-      document.removeEventListener('keydown', handleEscape)
-    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
   }, [])
 
-  const renderTypeLabel = (type: string) => {
-    switch (type) {
-      case 'FriendRequest':
-        return 'Lời mời kết bạn'
-      case 'PostLiked':
-        return 'Bài viết được thích'
-      case 'PostCommented':
-        return 'Có bình luận mới'
-      default:
-        return 'Thông báo hệ thống'
-    }
-  }
-
   return (
-    <div className="notification-bell" ref={containerRef}>
+    <div ref={containerRef} className="relative">
       <button
         type="button"
-        className="notification-bell__trigger"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
-        aria-controls="notification-panel"
+        className="relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200/70 bg-white/70 text-ink-700 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80 dark:text-ink-100"
       >
-        <Bell size={15} aria-hidden="true" />
-        <span>Thông báo</span>
-        {unreadCount > 0 ? <span className="notification-bell__badge">{unreadLabel}</span> : null}
+        {triggerIcon ?? <Bell size={16} />}
+        {unreadCount > 0 ? (
+          <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">
+            {badge}
+          </span>
+        ) : null}
       </button>
 
-      {open ? (
-        <section className="notification-bell__panel" id="notification-panel" role="dialog" aria-label="Danh sách thông báo">
-          <header>
-            <div className="notification-bell__title-wrap">
-              <h3>Thông báo</h3>
-              <small>{unreadCount} chưa đọc</small>
+      <AnimatePresence>
+        {open ? (
+          <motion.section
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.18 }}
+            className="absolute right-0 z-40 mt-2 w-[min(90vw,390px)] rounded-3xl border border-ink-200/80 bg-white/92 p-3 shadow-soft-xl backdrop-blur-xl dark:border-ink-700 dark:bg-ink-900/92"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h3 className="font-title text-lg text-ink-900 dark:text-white">Notifications</h3>
+                <p className="text-xs text-ink-500 dark:text-ink-400">{unreadCount} chưa đọc</p>
+              </div>
+              <button
+                type="button"
+                disabled={unreadCount === 0 || markingAllRead}
+                onClick={() => void markAllRead()}
+                className="inline-flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold text-brand-700 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-300 dark:hover:bg-ink-800"
+              >
+                <CheckCheck size={13} />
+                Đọc hết
+              </button>
             </div>
 
-            <Button type="button" variant="ghost" busy={markingAllRead} onClick={() => void markAllRead()} disabled={unreadCount === 0}>
-              <CheckCheck size={14} aria-hidden="true" />
-              Đọc tất cả
-            </Button>
-          </header>
+            {loading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="h-16 animate-pulse rounded-2xl bg-ink-100 dark:bg-ink-800" />
+                ))}
+              </div>
+            ) : null}
 
-          {loading ? <p>Đang tải...</p> : null}
-          {error ? (
-            <div className="notification-bell__error-state">
-              <p className="form-error">{error}</p>
-              <Button type="button" variant="ghost" onClick={() => void reload()}>
-                <RotateCcw size={14} aria-hidden="true" />
-                Thử lại
-              </Button>
-            </div>
-          ) : null}
+            {error ? <p className="rounded-xl bg-red-50 p-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-300">{error}</p> : null}
 
-          {!loading && !error && previewNotifications.length === 0 ? (
-            <div className="notification-bell__empty-state">
-              <p>Chưa có thông báo mới.</p>
-              <small>Thông báo về lời mời kết bạn, lượt thích và bình luận sẽ hiển thị tại đây.</small>
-            </div>
-          ) : null}
+            {!loading && !error ? (
+              <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
+                {items.length === 0 ? (
+                  <p className="rounded-2xl bg-ink-50 p-3 text-sm text-ink-500 dark:bg-ink-800 dark:text-ink-400">
+                    Không có thông báo mới.
+                  </p>
+                ) : null}
 
-          <ul>
-            {previewNotifications.map((item) => (
-              <li key={item.id} className={item.isRead ? '' : 'notification-bell__item--unread'}>
-                <div className="notification-bell__item-top">
-                  <span className="notification-bell__type-pill">{renderTypeLabel(item.type)}</span>
-                  {!item.isRead ? <span className="notification-bell__item-dot" aria-label="Chưa đọc" /> : null}
-                </div>
-
-                <p>{item.content}</p>
-
-                <div className="notification-bell__item-footer">
-                  <small>{new Date(item.createdAt).toLocaleString()}</small>
-                  {!item.isRead ? (
-                    <button type="button" className="notification-bell__read-btn" onClick={() => void markRead(item.id)}>
-                      Đánh dấu đã đọc
-                    </button>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+                {items.map((item) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => void markRead(item.id)}
+                    className={`w-full rounded-2xl p-3 text-left transition ${
+                      item.isRead
+                        ? 'bg-ink-50 text-ink-600 hover:bg-ink-100 dark:bg-ink-800 dark:text-ink-300 dark:hover:bg-ink-700'
+                        : 'bg-brand-50 text-ink-800 hover:bg-brand-100 dark:bg-ink-700 dark:text-ink-100'
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{item.content}</p>
+                    <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{new Date(item.createdAt).toLocaleString()}</p>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </motion.section>
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }

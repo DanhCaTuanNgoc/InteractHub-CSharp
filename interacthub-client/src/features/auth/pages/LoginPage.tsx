@@ -42,6 +42,7 @@ export function LoginPage() {
           id: payload.user.id,
           username: payload.user.userName,
           fullName: payload.user.fullName,
+          avatarUrl: payload.user.avatarUrl,
         },
       })
 
