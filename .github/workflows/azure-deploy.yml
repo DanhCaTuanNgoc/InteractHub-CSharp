@@ -2,7 +2,7 @@ name: CI-CD Azure Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
@@ -76,21 +76,17 @@ jobs:
 
   deploy-frontend:
     needs: build-and-test
-    if: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download frontend artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: interacthub-client/dist
-
       - name: Deploy frontend to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
         with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: upload
           app_location: interacthub-client
