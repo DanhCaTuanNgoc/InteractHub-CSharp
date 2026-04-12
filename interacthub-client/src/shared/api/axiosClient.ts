@@ -12,6 +12,14 @@ function isUploadRequest(url?: string): boolean {
   return url.includes('/uploads')
 }
 
+function isAuthRequest(url?: string): boolean {
+  if (!url) {
+    return false
+  }
+
+  return url.includes('/auth/login') || url.includes('/auth/register')
+}
+
 export const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
   timeout: 15000,
@@ -20,7 +28,7 @@ export const axiosClient = axios.create({
 axiosClient.interceptors.request.use((config) => {
   const token = getAccessToken()
 
-  if (token) {
+  if (token && !isAuthRequest(config.url)) {
     config.headers.Authorization = `Bearer ${token}`
   }
 
@@ -55,7 +63,7 @@ axiosClient.interceptors.response.use(
       })
     }
 
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isAuthRequest(requestUrl)) {
       clearAuthStorage()
       window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT))
     }
