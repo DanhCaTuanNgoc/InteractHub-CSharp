@@ -96,7 +96,7 @@ jobs:
       - name: Deploy API to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
-          app-name: interacthubsocial-g4hjgwced8ekhbee
+          app-name: ${{ steps.resolve_api_app.outputs.app_name }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./publish
 
