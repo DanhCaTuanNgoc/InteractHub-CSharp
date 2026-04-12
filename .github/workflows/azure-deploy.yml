@@ -72,6 +72,22 @@ jobs:
             exit 1
           fi
 
+          PROFILE_SITE=$(echo "$AZURE_WEBAPP_PUBLISH_PROFILE" | sed -n 's/.*msdeploySite="\([^"]*\)".*/\1/p' | head -n1)
+          PROFILE_DEST_URL=$(echo "$AZURE_WEBAPP_PUBLISH_PROFILE" | sed -n 's/.*destinationAppUrl="\([^"]*\)".*/\1/p' | head -n1)
+          PROFILE_HOST=$(echo "$PROFILE_DEST_URL" | sed -E 's#https?://([^/]+)/?.*#\1#')
+          PROFILE_HOST_PREFIX=${PROFILE_HOST%%.*}
+
+          if [ -z "$PROFILE_SITE" ] && [ -z "$PROFILE_HOST_PREFIX" ]; then
+            echo "Could not parse app identifiers from AZURE_WEBAPP_PUBLISH_PROFILE"
+            exit 1
+          fi
+
+          if [ "$AZURE_WEBAPP_NAME" != "$PROFILE_SITE" ] && [ "$AZURE_WEBAPP_NAME" != "$PROFILE_HOST_PREFIX" ]; then
+            echo "AZURE_WEBAPP_NAME does not match publish profile"
+            echo "Expected one of: '$PROFILE_SITE' or '$PROFILE_HOST_PREFIX'"
+            exit 1
+          fi
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
