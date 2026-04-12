@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using InteractHub.API.DTOs.Common;
+using InteractHub.API.DTOs.Request;
 using InteractHub.API.DTOs.Response;
 using InteractHub.API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -22,9 +23,11 @@ public class UploadsController : ControllerBase
     }
 
     [HttpPost("image")]
+    [Consumes("multipart/form-data")]
     [RequestSizeLimit(5 * 1024 * 1024)]
-    public async Task<IActionResult> UploadImage([FromForm] IFormFile file, CancellationToken cancellationToken)
+    public async Task<IActionResult> UploadImage([FromForm] UploadImageRequest request, CancellationToken cancellationToken)
     {
+        var file = request.File;
         var traceId = Request.Headers["X-Upload-Trace-Id"].ToString();
         if (string.IsNullOrWhiteSpace(traceId))
         {
