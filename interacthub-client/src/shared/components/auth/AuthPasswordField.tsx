@@ -1,5 +1,5 @@
 import { Eye, EyeOff, LockKeyhole } from 'lucide-react'
-import { useState, type InputHTMLAttributes } from 'react'
+import { forwardRef, useState, type InputHTMLAttributes } from 'react'
 import { AuthTextField } from './AuthTextField'
 
 type AuthPasswordFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
@@ -7,11 +7,15 @@ type AuthPasswordFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'
   error?: string
 }
 
-export function AuthPasswordField({ label, error, ...props }: AuthPasswordFieldProps) {
+export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldProps>(function AuthPasswordField(
+  { label, error, ...props },
+  ref,
+) {
   const [isVisible, setIsVisible] = useState(false)
 
   return (
     <AuthTextField
+      ref={ref}
       {...props}
       label={label}
       type={isVisible ? 'text' : 'password'}
@@ -31,4 +35,4 @@ export function AuthPasswordField({ label, error, ...props }: AuthPasswordFieldP
       }
     />
   )
-}
+})
