@@ -89,18 +89,14 @@ export function LoginPage() {
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
           <AuthTextField
-            label="Email"
-            type="email"
-            placeholder="you@interacthub.app"
-            autoComplete="email"
+            label="Email or username"
+            type="text"
+            placeholder="you@interacthub.app or your_username"
+            autoComplete="username"
             error={errors.email?.message}
             icon={<Mail size={18} aria-hidden="true" />}
             {...register('email', {
-              required: 'Email is required.',
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Please enter a valid email address.',
-              },
+              required: 'Email or username is required.',
             })}
           />
 

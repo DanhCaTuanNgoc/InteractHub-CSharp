@@ -55,7 +55,12 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var loginInput = request.Email.Trim();
+        var normalizedEmail = _userManager.NormalizeEmail(loginInput);
+        var normalizedUserName = _userManager.NormalizeName(loginInput);
+
+        var user = await _userManager.Users.FirstOrDefaultAsync(
+            u => u.NormalizedEmail == normalizedEmail || u.NormalizedUserName == normalizedUserName);
         if (user is null)
         {
             throw new UnauthorizedAccessException("Thông tin đăng nhập không hợp lệ.");
