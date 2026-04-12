@@ -58,15 +58,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate API deploy secrets
+        id: resolve_api_app
         env:
-          AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
           AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         run: |
-          if [ -z "$AZURE_WEBAPP_NAME" ]; then
-            echo "Missing required secret: AZURE_WEBAPP_NAME"
-            exit 1
-          fi
-
           if [ -z "$AZURE_WEBAPP_PUBLISH_PROFILE" ]; then
             echo "Missing required secret: AZURE_WEBAPP_PUBLISH_PROFILE"
             exit 1
@@ -82,11 +77,13 @@ jobs:
             exit 1
           fi
 
-          if [ "$AZURE_WEBAPP_NAME" != "$PROFILE_SITE" ] && [ "$AZURE_WEBAPP_NAME" != "$PROFILE_HOST_PREFIX" ]; then
-            echo "AZURE_WEBAPP_NAME does not match publish profile"
-            echo "Expected one of: '$PROFILE_SITE' or '$PROFILE_HOST_PREFIX'"
-            exit 1
+          RESOLVED_APP_NAME="$PROFILE_SITE"
+          if [ -z "$RESOLVED_APP_NAME" ]; then
+            RESOLVED_APP_NAME="$PROFILE_HOST_PREFIX"
           fi
+
+          echo "Resolved Azure Web App name: $RESOLVED_APP_NAME"
+          echo "app_name=$RESOLVED_APP_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -99,7 +96,7 @@ jobs:
       - name: Deploy API to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          app-name: interacthubsocial-g4hjgwced8ekhbee
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./publish
 
