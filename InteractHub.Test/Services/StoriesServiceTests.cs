@@ -38,7 +38,7 @@ public class StoriesServiceTests
             });
         await db.SaveChangesAsync();
 
-        var service = new StoriesService(new Repository<Story>(db));
+        var service = new StoriesService(new Repository<Story>(db), new Repository<Friendship>(db));
         var result = await service.GetActiveStoriesAsync("u1");
 
         Assert.Single(result);
@@ -51,7 +51,7 @@ public class StoriesServiceTests
         using var db = TestDbFactory.CreateInMemoryContext();
         await SeedUsersAsync(db, "u1");
 
-        var service = new StoriesService(new Repository<Story>(db));
+        var service = new StoriesService(new Repository<Story>(db), new Repository<Friendship>(db));
         var before = DateTime.UtcNow;
 
         var result = await service.CreateAsync("u1", new CreateStoryRequest { MediaUrl = "https://cdn/new.jpg" });
@@ -77,7 +77,7 @@ public class StoriesServiceTests
         db.Stories.Add(story);
         await db.SaveChangesAsync();
 
-        var service = new StoriesService(new Repository<Story>(db));
+        var service = new StoriesService(new Repository<Story>(db), new Repository<Friendship>(db));
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.DeleteAsync(story.Id, "other", false));
     }
