@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '../../auth/hooks/useAuth'
 import { storyService } from '../../../shared/services/storyService'
 
 type UseStoriesQueryOptions = {
@@ -6,11 +7,13 @@ type UseStoriesQueryOptions = {
 }
 
 export function useStoriesQuery(options?: UseStoriesQueryOptions) {
+  const { user, isAuthenticated } = useAuth()
+
   return useQuery({
-    queryKey: ['stories'],
+    queryKey: ['stories', user?.id ?? 'guest'],
     queryFn: () => storyService.getAll(),
     staleTime: 30_000,
     refetchOnMount: 'always',
-    enabled: options?.enabled,
+    enabled: isAuthenticated && (options?.enabled ?? true),
   })
 }

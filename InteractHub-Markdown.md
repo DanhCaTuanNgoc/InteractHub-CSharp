@@ -700,3 +700,14 @@ dotnet ef database update --project InteractHub.API --startup-project InteractHu
 ---
 
 *README này được tạo dựa trên phân tích đề bài InteractHub Full-Stack Assignment.*
+
+
+
+interacthub-ad
+Admin123@
+
+Blob sas token 
+sp=r&st=2026-04-12T05:38:41Z&se=2026-04-12T13:53:41Z&spr=https&sv=2025-11-05&sr=c&sig=mrqHx5dA5NfxkP1rHYf%2FTuakKPZNN3Y9JA9TQVfFufw%3D
+
+Blob sas url 
+https://interacthubstorage.blob.core.windows.net/images?sp=r&st=2026-04-12T05:38:41Z&se=2026-04-12T13:53:41Z&spr=https&sv=2025-11-05&sr=c&sig=mrqHx5dA5NfxkP1rHYf%2FTuakKPZNN3Y9JA9TQVfFufw%3D

@@ -1,16 +1,23 @@
 import { useState } from 'react'
+import { Mail } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../../shared/components/common/Button'
-import { TextInput } from '../../../shared/components/common/TextInput'
 import { useAuth } from '../hooks/useAuth'
 import { ROUTES } from '../../../shared/constants/routes'
 import { authService } from '../../../shared/services/authService'
+import { AuthTextField } from '../../../shared/components/auth/AuthTextField'
+import { AuthPasswordField } from '../../../shared/components/auth/AuthPasswordField'
+import { AuthErrorMessage } from '../../../shared/components/auth/AuthErrorMessage'
 
 type LoginFormValues = {
   email: string
   password: string
+  rememberMe: boolean
 }
+
+const REMEMBER_EMAIL_KEY = 'interacthub_remembered_email'
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth()
@@ -21,7 +28,14 @@ export function LoginPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({ mode: 'onTouched' })
+  } = useForm<LoginFormValues>({
+    mode: 'onTouched',
+    defaultValues: {
+      email: localStorage.getItem(REMEMBER_EMAIL_KEY) ?? '',
+      password: '',
+      rememberMe: Boolean(localStorage.getItem(REMEMBER_EMAIL_KEY)),
+    },
+  })
 
   const targetPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ??
     ROUTES.home
@@ -34,7 +48,16 @@ export function LoginPage() {
     setSubmitError(null)
 
     try {
-      const payload = await authService.login(values)
+      if (values.rememberMe) {
+        localStorage.setItem(REMEMBER_EMAIL_KEY, values.email)
+      } else {
+        localStorage.removeItem(REMEMBER_EMAIL_KEY)
+      }
+
+      const payload = await authService.login({
+        email: values.email,
+        password: values.password,
+      })
 
       login({
         accessToken: payload.token,
@@ -53,48 +76,60 @@ export function LoginPage() {
   })
 
   return (
-    <main className="auth-layout px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <section className="auth-card w-full max-w-xl p-5 sm:p-7 lg:p-8">
-        <p className="hero-section__eyebrow">Welcome back</p>
+    <motion.main
+      className="auth-layout"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
+      <section className="auth-card auth-card--narrow">
+        <p className="auth-card__eyebrow">Welcome back</p>
         <h1>Sign in to InteractHub</h1>
-        <p>Đăng nhập bằng tài khoản thật từ backend API.</p>
+        <p>Manage your feed, stories and notifications in one place.</p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
-          <TextInput
+          <AuthTextField
             label="Email"
             type="email"
             placeholder="you@interacthub.app"
+            autoComplete="email"
             error={errors.email?.message}
+            icon={<Mail size={18} aria-hidden="true" />}
             {...register('email', {
-              required: 'Email là bắt buộc.',
+              required: 'Email is required.',
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Email không hợp lệ.',
+                message: 'Please enter a valid email address.',
               },
             })}
           />
 
-          <TextInput
+          <AuthPasswordField
             label="Password"
-            type="password"
+            autoComplete="current-password"
             error={errors.password?.message}
             {...register('password', {
-              required: 'Password là bắt buộc.',
-              minLength: { value: 8, message: 'Password tối thiểu 8 ký tự.' },
+              required: 'Password is required.',
+              minLength: { value: 8, message: 'Password must be at least 8 characters.' },
             })}
           />
 
-          {submitError ? <p className="form-error">{submitError}</p> : null}
+          <label className="auth-check">
+            <input type="checkbox" {...register('rememberMe')} />
+            <span>Remember me</span>
+          </label>
 
-          <Button type="submit" fullWidth busy={isSubmitting}>
-            Continue
+          {submitError ? <AuthErrorMessage message={submitError} /> : null}
+
+          <Button type="submit" fullWidth busy={isSubmitting} className="auth-submit-btn">
+            Sign In
           </Button>
         </form>
 
         <p className="auth-card__footnote">
-          Chưa có tài khoản? <Link to={ROUTES.register}>Tạo tài khoản mới</Link>
+          New here? <Link to={ROUTES.register}>Create an account</Link>
         </p>
       </section>
-    </main>
+    </motion.main>
   )
 }

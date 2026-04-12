@@ -1,13 +1,16 @@
 import { useMemo, useState } from 'react'
-import { CheckCircle2, CircleAlert } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { AtSign, CheckCircle2, CircleAlert, Mail, UserRound } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { PasswordStrength } from '../../../shared/components/auth/PasswordStrength'
 import { Button } from '../../../shared/components/common/Button'
-import { TextInput } from '../../../shared/components/common/TextInput'
 import { ROUTES } from '../../../shared/constants/routes'
 import { authService } from '../../../shared/services/authService'
 import { useAuth } from '../hooks/useAuth'
+import { AuthErrorMessage } from '../../../shared/components/auth/AuthErrorMessage'
+import { AuthPasswordField } from '../../../shared/components/auth/AuthPasswordField'
+import { AuthTextField } from '../../../shared/components/auth/AuthTextField'
 
 type RegisterFormValues = {
   userName: string
@@ -66,23 +69,23 @@ export function RegisterPage() {
 
   const passwordRules = useMemo(
     () => ({
-      required: 'Mật khẩu là bắt buộc.',
-      minLength: { value: 10, message: 'Mật khẩu tối thiểu 10 ký tự.' },
-      maxLength: { value: 64, message: 'Mật khẩu tối đa 64 ký tự.' },
+      required: 'Password is required.',
+      minLength: { value: 10, message: 'Password must be at least 10 characters.' },
+      maxLength: { value: 64, message: 'Password must be at most 64 characters.' },
       validate: {
-        upper: (value: string) => /[A-Z]/.test(value) || 'Mật khẩu cần ít nhất 1 chữ in hoa.',
-        lower: (value: string) => /[a-z]/.test(value) || 'Mật khẩu cần ít nhất 1 chữ thường.',
-        number: (value: string) => /\d/.test(value) || 'Mật khẩu cần ít nhất 1 chữ số.',
-        special: (value: string) => /[^A-Za-z0-9]/.test(value) || 'Mật khẩu cần ít nhất 1 ký tự đặc biệt.',
-        noWhitespace: (value: string) => !/\s/.test(value) || 'Mật khẩu không được chứa khoảng trắng.',
+        upper: (value: string) => /[A-Z]/.test(value) || 'Include at least one uppercase letter.',
+        lower: (value: string) => /[a-z]/.test(value) || 'Include at least one lowercase letter.',
+        number: (value: string) => /\d/.test(value) || 'Include at least one number.',
+        special: (value: string) => /[^A-Za-z0-9]/.test(value) || 'Include at least one special character.',
+        noWhitespace: (value: string) => !/\s/.test(value) || 'Password cannot contain whitespace.',
         noUserName: (value: string) =>
-          !normalizedUserName || !value.toLowerCase().includes(normalizedUserName) || 'Mật khẩu không được chứa username.',
+          !normalizedUserName || !value.toLowerCase().includes(normalizedUserName) || 'Password cannot include your username.',
         noEmailLocalPart: (value: string) => {
           const localPart = normalizedEmail.split('@')[0]
           if (!localPart || localPart.length < 3) {
             return true
           }
-          return !value.toLowerCase().includes(localPart) || 'Mật khẩu không nên chứa phần đầu email.'
+          return !value.toLowerCase().includes(localPart) || 'Password should not include the email local-part.'
         },
       },
     }),
@@ -125,64 +128,71 @@ export function RegisterPage() {
   })
 
   return (
-    <main className="auth-layout px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <section className="auth-card w-full max-w-xl p-5 sm:p-7 lg:p-8">
-        <p className="hero-section__eyebrow">Create account</p>
+    <motion.main
+      className="auth-layout"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
+      <section className="auth-card">
+        <p className="auth-card__eyebrow">Create account</p>
         <h1>Join InteractHub</h1>
-        <p>Tạo tài khoản với tiêu chuẩn bảo mật cao để bắt đầu chia sẻ an toàn.</p>
+        <p>Create your account to start connecting, posting and sharing stories.</p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
-          <TextInput
+          <AuthTextField
             label="Username"
             placeholder="demo_user"
             autoComplete="username"
             error={errors.userName?.message}
+            icon={<AtSign size={18} aria-hidden="true" />}
             {...register('userName', {
-              required: 'Username là bắt buộc.',
+              required: 'Username is required.',
               pattern: {
                 value: USERNAME_PATTERN,
                 message:
-                  'Username 4-20 ký tự, chỉ gồm chữ/số/dấu chấm/gạch dưới, không bắt đầu hoặc kết thúc bằng dấu.',
+                  'Use 4-20 characters with letters, numbers, dots or underscores.',
               },
               setValueAs: (value: string) => value.trim().toLowerCase(),
             })}
           />
 
-          <TextInput
-            label="Họ tên"
+          <AuthTextField
+            label="Full name"
             placeholder="Demo User"
             autoComplete="name"
             error={errors.fullName?.message}
+            icon={<UserRound size={18} aria-hidden="true" />}
             {...register('fullName', {
-              required: 'Họ tên là bắt buộc.',
+              required: 'Full name is required.',
               pattern: {
                 value: FULLNAME_PATTERN,
-                message: 'Họ tên chỉ nên gồm chữ cái và khoảng trắng hợp lệ, tối đa 60 ký tự.',
+                message: 'Only letters and valid spaces are allowed, up to 60 characters.',
               },
-              validate: (value) => !/\s{2,}/.test(value.trim()) || 'Họ tên không được chứa nhiều khoảng trắng liên tiếp.',
+              validate: (value) => !/\s{2,}/.test(value.trim()) || 'Please avoid repeated spaces.',
               setValueAs: (value: string) => value.trim().replace(/\s+/g, ' '),
             })}
           />
 
-          <TextInput
+          <AuthTextField
             label="Email"
             type="email"
             placeholder="you@interacthub.app"
             autoComplete="email"
             error={errors.email?.message}
+            icon={<Mail size={18} aria-hidden="true" />}
             {...register('email', {
-              required: 'Email là bắt buộc.',
+              required: 'Email is required.',
               pattern: {
                 value: EMAIL_PATTERN,
-                message: 'Email không hợp lệ.',
+                message: 'Please enter a valid email address.',
               },
               setValueAs: (value: string) => value.trim().toLowerCase(),
             })}
           />
 
-          <TextInput
-            label="Mật khẩu"
-            type="password"
+          <AuthPasswordField
+            label="Password"
             autoComplete="new-password"
             error={errors.password?.message}
             {...register('password', passwordRules)}
@@ -191,11 +201,11 @@ export function RegisterPage() {
           <PasswordStrength password={password ?? ''} />
 
           <section className="register-quality-panel" aria-live="polite">
-            <h3>Yêu cầu mật khẩu</h3>
+            <h3>Password requirements</h3>
             <ul>
               <li className={passwordChecks.minLen ? 'is-valid' : ''}>
                 {passwordChecks.minLen ? <CheckCircle2 size={14} aria-hidden="true" /> : <CircleAlert size={14} aria-hidden="true" />}
-                Tối thiểu 10 ký tự
+                At least 10 characters
               </li>
               <li className={passwordChecks.hasUpper && passwordChecks.hasLower ? 'is-valid' : ''}>
                 {passwordChecks.hasUpper && passwordChecks.hasLower ? (
@@ -203,11 +213,11 @@ export function RegisterPage() {
                 ) : (
                   <CircleAlert size={14} aria-hidden="true" />
                 )}
-                Có cả chữ hoa và chữ thường
+                Include uppercase and lowercase letters
               </li>
               <li className={passwordChecks.hasNumber ? 'is-valid' : ''}>
                 {passwordChecks.hasNumber ? <CheckCircle2 size={14} aria-hidden="true" /> : <CircleAlert size={14} aria-hidden="true" />}
-                Có ít nhất 1 chữ số
+                Include at least one number
               </li>
               <li className={passwordChecks.hasSpecial ? 'is-valid' : ''}>
                 {passwordChecks.hasSpecial ? (
@@ -215,7 +225,7 @@ export function RegisterPage() {
                 ) : (
                   <CircleAlert size={14} aria-hidden="true" />
                 )}
-                Có ít nhất 1 ký tự đặc biệt
+                Include at least one special character
               </li>
               <li className={passwordChecks.noWhitespace ? 'is-valid' : ''}>
                 {passwordChecks.noWhitespace ? (
@@ -223,54 +233,53 @@ export function RegisterPage() {
                 ) : (
                   <CircleAlert size={14} aria-hidden="true" />
                 )}
-                Không chứa khoảng trắng
+                No whitespace
               </li>
             </ul>
           </section>
 
-          <TextInput
-            label="Xác nhận mật khẩu"
-            type="password"
+          <AuthPasswordField
+            label="Confirm password"
             autoComplete="new-password"
             error={errors.confirmPassword?.message}
             {...register('confirmPassword', {
-              required: 'Vui lòng xác nhận mật khẩu.',
-              validate: (value) => value === password || 'Mật khẩu xác nhận không khớp.',
+              required: 'Please confirm your password.',
+              validate: (value) => value === password || 'Passwords do not match.',
             })}
           />
 
-          <label className="register-terms">
+          <label className="auth-check">
             <input
               type="checkbox"
               {...register('acceptTerms', {
-                validate: (value) => value || 'Bạn cần đồng ý điều khoản để tiếp tục.',
+                validate: (value) => value || 'You must accept the terms to continue.',
               })}
             />
             <span>
-              Tôi đồng ý với Điều khoản sử dụng và Chính sách bảo mật của InteractHub.
+              I agree to InteractHub Terms of Use and Privacy Policy.
             </span>
           </label>
-          {errors.acceptTerms?.message ? <p className="form-error">{errors.acceptTerms.message}</p> : null}
+          {errors.acceptTerms?.message ? <p className="auth-field__error">{errors.acceptTerms.message}</p> : null}
 
           {!errors.confirmPassword?.message && confirmPassword && password !== confirmPassword ? (
-            <p className="form-error">Mật khẩu xác nhận chưa khớp.</p>
+            <p className="auth-field__error">Passwords do not match.</p>
           ) : null}
 
           {!isValid && (Object.keys(touchedFields).length > 0 || isSubmitting) ? (
-            <p className="register-validation-hint">Vui lòng kiểm tra lại các trường đang báo lỗi trước khi gửi.</p>
+            <p className="register-validation-hint">Please fix validation errors before submitting.</p>
           ) : null}
 
-          {submitError ? <p className="form-error">{submitError}</p> : null}
+          {submitError ? <AuthErrorMessage message={submitError} /> : null}
 
-          <Button type="submit" fullWidth busy={isSubmitting} disabled={!isValid || !acceptTerms}>
-            Tạo tài khoản
+          <Button type="submit" fullWidth busy={isSubmitting} disabled={!isValid || !acceptTerms} className="auth-submit-btn">
+            Create account
           </Button>
         </form>
 
         <p className="auth-card__footnote">
-          Đã có tài khoản? <Link to={ROUTES.login}>Đăng nhập</Link>
+          Already have an account? <Link to={ROUTES.login}>Sign in</Link>
         </p>
       </section>
-    </main>
+    </motion.main>
   )
 }

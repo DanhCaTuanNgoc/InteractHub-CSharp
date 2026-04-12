@@ -16,7 +16,16 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            // Azure SQL on free/shared tiers may briefly reject connections during cold starts.
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
+        }));
 
 builder.Services
     .AddIdentityCore<User>(options =>
@@ -77,8 +86,18 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactClient", policy =>
     {
-        policy
-            .WithOrigins(
+        var configuredOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>()?
+            .Where(origin => !string.IsNullOrWhiteSpace(origin))
+            .Select(origin => origin.Trim().TrimEnd('/'))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var allowedOrigins = (configuredOrigins is { Length: > 0 }
+            ? configuredOrigins
+            : new[]
+            {
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "http://localhost:5174",
@@ -90,7 +109,11 @@ builder.Services.AddCors(options =>
                 "http://127.0.0.1:5174",
                 "https://127.0.0.1:5174",
                 "http://127.0.0.1:4173",
-                "https://127.0.0.1:4173")
+                "https://127.0.0.1:4173"
+            });
+
+        policy
+            .WithOrigins(allowedOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -119,11 +142,9 @@ var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

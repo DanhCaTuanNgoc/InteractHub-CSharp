@@ -31,16 +31,21 @@ export function AppShell() {
           <div className="ml-auto flex items-center gap-2">
             <Link
               to={ROUTES.profile(user?.id ?? 'me')}
-              className="ui-interactive ui-ripple-static inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-ink-200/70 bg-white/70 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80"
+              className="ui-interactive ui-ripple-static inline-flex h-10 items-center gap-2 rounded-full border border-ink-200/70 bg-white/70 px-1.5 pr-3 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80"
               aria-label="Go to profile"
             >
-              {user?.avatarUrl ? (
-                <LazyImage src={user.avatarUrl} alt={user.fullName} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-semibold text-ink-700 dark:text-ink-100">
-                  {(user?.fullName ?? user?.username ?? 'U').slice(0, 1).toUpperCase()}
-                </span>
-              )}
+              <span className="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
+                {user?.avatarUrl ? (
+                  <LazyImage src={user.avatarUrl} alt={user.fullName} wrapperClassName="h-full w-full" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-sm font-semibold text-ink-700 dark:text-ink-100">
+                    {(user?.fullName ?? user?.username ?? 'U').slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+              </span>
+              <span className="max-w-[200px] truncate text-sm font-semibold text-ink-700 dark:text-ink-100">
+                { user?.fullName ?? 'User'}
+              </span>
             </Link>
 
             {/* <ThemeToggle isDark={isDark} onToggle={toggleTheme} /> */}
