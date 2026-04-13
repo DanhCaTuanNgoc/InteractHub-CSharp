@@ -152,7 +152,9 @@ export function StoriesPage() {
 
           {!loading && stories.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 text-center shadow-sm">
-              <p className="text-sm text-slate-500">Chưa có story nào, hãy đăng story đầu tiên của bạn.</p>
+              <p className="text-sm text-slate-500">
+                Chưa có story nào, hãy đăng story đầu tiên của bạn.
+              </p>
             </div>
           ) : null}
 

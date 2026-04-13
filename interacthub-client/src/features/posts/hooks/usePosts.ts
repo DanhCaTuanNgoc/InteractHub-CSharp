@@ -59,7 +59,8 @@ export function usePosts() {
         queryClient.setQueryData<FeedInfiniteData>(queryKey, () =>
           updatePostInFeedData(data, postId, (post) => ({
             ...post,
-            likeCount: Math.max(0, post.likeCount + 1),
+            isLikedByCurrentUser: !post.isLikedByCurrentUser,
+            likeCount: Math.max(0, post.likeCount + (post.isLikedByCurrentUser ? -1 : 1)),
           })),
         )
       })
@@ -95,6 +96,14 @@ export function usePosts() {
     },
   })
 
+  const sharePostMutation = useMutation({
+    mutationFn: (postId: string) => postService.share(postId),
+    onSuccess: () => {
+      postService.invalidateFeedCache()
+      void queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+
   const posts = feedQuery.data?.pages.flatMap((page) => page.items) ?? []
 
   return {
@@ -103,5 +112,6 @@ export function usePosts() {
     createPost: createPostMutation,
     toggleLike: toggleLikeMutation,
     addComment: addCommentMutation,
+    sharePost: sharePostMutation,
   }
 }

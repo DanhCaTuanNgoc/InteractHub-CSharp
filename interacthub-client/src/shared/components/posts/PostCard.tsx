@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Clock3, Ellipsis, Heart, MessageCircle, Pencil, Send, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
@@ -37,9 +37,8 @@ export function PostCard({
   const [busyAction, setBusyAction] = useState<string | null>(null)
   const [localError, setLocalError] = useState<string | null>(null)
   const [likeFx, setLikeFx] = useState<'idle' | 'like' | 'unlike'>('idle')
-  const [isLiked, setIsLiked] = useState(false)
-  const [pendingLikeUpdate, setPendingLikeUpdate] = useState(false)
-  const [lastLikeCount, setLastLikeCount] = useState(post.likeCount)
+  const previousPostIdRef = useRef(post.id)
+  const previousLikedRef = useRef(post.isLikedByCurrentUser)
 
   const isOwner = useMemo(() => currentUserId === post.user.id, [currentUserId, post.user.id])
   const originalPost = useMemo(() => post.originalPost ?? null, [post.originalPost])
@@ -47,28 +46,20 @@ export function PostCard({
   const canEdit = isOwner && !isSharedPost
 
   useEffect(() => {
-    setLikeFx('idle')
-    setIsLiked(false)
-    setPendingLikeUpdate(false)
-    setLastLikeCount(post.likeCount)
-  }, [post.id, post.likeCount])
-
-  useEffect(() => {
-    if (post.likeCount === lastLikeCount) {
+    if (previousPostIdRef.current !== post.id) {
+      previousPostIdRef.current = post.id
+      previousLikedRef.current = post.isLikedByCurrentUser
+      setLikeFx('idle')
       return
     }
 
-    const increased = post.likeCount > lastLikeCount
-    setLastLikeCount(post.likeCount)
-
-    if (!pendingLikeUpdate) {
+    if (previousLikedRef.current === post.isLikedByCurrentUser) {
       return
     }
 
-    setIsLiked(increased)
-    setLikeFx(increased ? 'like' : 'unlike')
-    setPendingLikeUpdate(false)
-  }, [lastLikeCount, pendingLikeUpdate, post.likeCount])
+    setLikeFx(post.isLikedByCurrentUser ? 'like' : 'unlike')
+    previousLikedRef.current = post.isLikedByCurrentUser
+  }, [post.id, post.isLikedByCurrentUser])
 
   useEffect(() => {
     if (likeFx === 'idle') {
@@ -78,15 +69,6 @@ export function PostCard({
     const timeout = window.setTimeout(() => setLikeFx('idle'), 560)
     return () => window.clearTimeout(timeout)
   }, [likeFx])
-
-  useEffect(() => {
-    if (!pendingLikeUpdate) {
-      return
-    }
-
-    const timeout = window.setTimeout(() => setPendingLikeUpdate(false), 1400)
-    return () => window.clearTimeout(timeout)
-  }, [pendingLikeUpdate])
 
   const runAction = async (action: string, fn: () => Promise<void>) => {
     setBusyAction(action)
@@ -141,7 +123,6 @@ export function PostCard({
   }
 
   const handleLikeClick = () => {
-    setPendingLikeUpdate(true)
     onLike(post.id)
   }
 
@@ -255,8 +236,8 @@ export function PostCard({
       <footer className="post-card__actions">
         <button
           type="button"
-          className={`post-card__action-btn post-card__action-btn--like ${isLiked ? 'post-card__action-btn--liked' : ''}`}
-          aria-pressed={isLiked}
+          className={`post-card__action-btn post-card__action-btn--like ${post.isLikedByCurrentUser ? 'post-card__action-btn--liked' : ''}`}
+          aria-pressed={post.isLikedByCurrentUser}
           onClick={handleLikeClick}
         >
           <span
@@ -336,10 +317,10 @@ export function PostCard({
           />
           <div className="post-card__inline-actions">
             <Button type="submit" variant="danger" busy={busyAction === 'report'}>
-              Gui bao cao
+              Gửi báo cáo
             </Button>
             <Button type="button" variant="ghost" onClick={() => setIsReporting(false)}>
-              Huy
+              Huỷ
             </Button>
           </div>
         </form>

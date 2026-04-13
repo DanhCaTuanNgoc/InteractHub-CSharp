@@ -5,10 +5,13 @@ import { AuthTextField } from './AuthTextField'
 type AuthPasswordFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   label: string
   error?: string
+  hint?: string
+  successMessage?: string
+  isValid?: boolean
 }
 
 export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldProps>(function AuthPasswordField(
-  { label, error, ...props },
+  { label, error, hint, successMessage, isValid = false, ...props },
   ref,
 ) {
   const [isVisible, setIsVisible] = useState(false)
@@ -21,6 +24,9 @@ export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldP
       type={isVisible ? 'text' : 'password'}
       autoComplete={props.autoComplete}
       error={error}
+      hint={hint}
+      successMessage={successMessage}
+      isValid={isValid}
       icon={<LockKeyhole size={18} aria-hidden="true" />}
       rightSlot={
         <button

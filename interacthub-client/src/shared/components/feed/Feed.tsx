@@ -11,6 +11,7 @@ type FeedProps = {
   isFetchingNextPage: boolean
   onLoadMore: () => void
   onLike: (postId: string) => void
+  onShare: (postId: string) => void
   onOpenComments: (post: Post) => void
 }
 
@@ -22,6 +23,7 @@ export function Feed({
   isFetchingNextPage,
   onLoadMore,
   onLike,
+  onShare,
   onOpenComments,
 }: FeedProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -72,7 +74,7 @@ export function Feed({
   return (
     <section className="space-y-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onLike={onLike} onOpenComments={onOpenComments} />
+        <PostCard key={post.id} post={post} onLike={onLike} onShare={onShare} onOpenComments={onOpenComments} />
       ))}
 
       <div ref={sentinelRef} className="h-8" />

@@ -23,14 +23,14 @@ public class PostsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
     {
-        var data = await _postsService.GetFeedAsync(page, pageSize);
+        var data = await _postsService.GetFeedAsync(page, pageSize, GetCurrentUserId());
         return Ok(ApiResponse<PagedResult<PostResponse>>.Ok(data));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var post = await _postsService.GetByIdAsync(id);
+        var post = await _postsService.GetByIdAsync(id, GetCurrentUserId());
         if (post is null)
         {
             return NotFound(ApiResponse<PostResponse>.Fail("Không tìm thấy bài viết."));

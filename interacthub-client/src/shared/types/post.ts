@@ -15,6 +15,7 @@ export type Post = {
   originalPostId?: string | null
   originalPost?: Post | null
   likeCount: number
+  isLikedByCurrentUser: boolean
   commentCount: number
   user: UserSummary
   hashtags: string[]

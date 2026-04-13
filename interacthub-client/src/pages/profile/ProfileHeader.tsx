@@ -54,19 +54,19 @@ export function ProfileHeader({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Avatar src={profile?.avatarUrl ?? null} alt={profile?.fullName ?? 'User avatar'} size="lg" />
+          <Avatar src={profile?.avatarUrl ?? null} alt={profile?.fullName ?? 'Ảnh đại diện'} size="lg" />
         </motion.div>
 
         <div className="max-w-2xl space-y-2">
           <h1 className="inline-flex items-center justify-center gap-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            <span>{profile?.fullName ?? 'Profile'}</span>
+            <span>{profile?.fullName ?? 'Trang cá nhân'}</span>
             <BadgeCheck size={18} className="text-cyan-600" />
           </h1>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600">
             <span className="inline-flex items-center gap-1.5">
               <AtSign size={14} />
-              {profile?.userName ?? 'username'}
+              {profile?.userName ?? 'tên người dùng'}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Mail size={14} />
@@ -82,29 +82,23 @@ export function ProfileHeader({
         <div className="mt-6 grid w-full max-w-md grid-cols-3 gap-3">
           <div className="rounded-2xl bg-white/80 px-3 py-4 shadow-sm">
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{postCount}</p>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Posts</p>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Bài đăng</p>
           </div>
           <div className="rounded-2xl bg-white/80 px-3 py-4 shadow-sm">
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{storyCount}</p>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Stories</p>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Tin</p>
           </div>
           <div className="rounded-2xl bg-white/80 px-3 py-4 shadow-sm">
-            <p className="text-xl font-bold text-slate-900 sm:text-2xl">{relationshipLabel}</p>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Connection</p>
+            <p className="text-sm font-semibold text-slate-900 sm:text-lg">
+              {relationshipLabel}
+            </p>
+            <p className="text-[10px] uppercase tracking-wide text-slate-500">
+              Trạng thái
+            </p>
           </div>
         </div>
 
         <div className="mt-6 w-full max-w-md space-y-3">
-          {isOwnProfile ? (
-            <Button
-              type="button"
-              onClick={onEditProfile}
-              className="w-full justify-center rounded-2xl bg-slate-900 text-white transition hover:bg-slate-800"
-            >
-              <UserRoundPen size={16} />
-              Edit profile
-            </Button>
-          ) : null}
 
           {!isOwnProfile && relationshipLoading ? <p className="text-sm text-slate-500">Đang tải trạng thái kết bạn...</p> : null}
           {!isOwnProfile && relationshipError ? <p className="form-error">{relationshipError}</p> : null}
@@ -118,7 +112,7 @@ export function ProfileHeader({
               className="w-full justify-center rounded-2xl bg-cyan-600 text-white transition hover:bg-cyan-500"
             >
               <UserRoundPlus size={16} />
-              Follow / Add friend
+              Theo dõi / Kết bạn
             </Button>
           ) : null}
 
@@ -131,7 +125,7 @@ export function ProfileHeader({
                 className="justify-center rounded-2xl bg-emerald-600 text-white transition hover:bg-emerald-500"
               >
                 <UserRoundCheck size={16} />
-                Accept
+                Chấp nhận
               </Button>
               <Button
                 type="button"
@@ -140,7 +134,7 @@ export function ProfileHeader({
                 onClick={onDeclineRequest}
                 className="justify-center rounded-2xl"
               >
-                Decline
+                Từ chối
               </Button>
             </div>
           ) : null}
@@ -153,17 +147,17 @@ export function ProfileHeader({
               onClick={onRemoveFriend}
               className="w-full justify-center rounded-2xl border border-slate-300 bg-white/80 text-slate-700 hover:bg-slate-100"
             >
-              Friends • Remove
+              Bạn bè • Hủy kết bạn
             </Button>
           ) : null}
 
           {!isOwnProfile && !relationshipLoading && relationship?.status === 'RequestSent' ? (
             <Button type="button" variant="ghost" disabled className="w-full justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-500">
-              Request sent
+              Đã gửi lời mời
             </Button>
           ) : null}
         </div>
       </div>
     </motion.section>
   )
-}
+} 

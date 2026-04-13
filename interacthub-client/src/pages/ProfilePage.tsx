@@ -420,8 +420,8 @@ export function ProfilePage() {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-cyan-100/30" />
           <form className="relative z-10 space-y-4" onSubmit={onSubmit} noValidate>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Edit profile details</h2>
-              <p className="mt-1 text-sm text-slate-500">Update your public information and profile photo.</p>
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Chỉnh sửa thông tin hồ sơ</h2>
+              <p className="mt-1 text-sm text-slate-500">Cập nhật thông tin hồ sơ của bạn.</p>
             </div>
 
             {error ? <p className="form-error">{error}</p> : null}
@@ -452,7 +452,7 @@ export function ProfilePage() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
-              <FileInput label="Avatar" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
+              <FileInput label="Ảnh đại diện" previewUrl={previewUrl ?? profile?.avatarUrl ?? null} accept="image/*" {...register('avatar')} />
             </div>
 
             {submitError ? <p className="form-error">{submitError}</p> : null}
@@ -463,7 +463,7 @@ export function ProfilePage() {
               className="rounded-2xl bg-slate-900 px-4 py-2.5 text-white shadow-sm transition hover:bg-slate-800 hover:shadow-lg"
             >
               <Save size={15} aria-hidden="true" />
-              Save change
+              Lưu thay đổi
             </Button>
           </form>
         </motion.article>

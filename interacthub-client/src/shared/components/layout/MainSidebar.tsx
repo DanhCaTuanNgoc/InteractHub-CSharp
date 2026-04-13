@@ -8,11 +8,11 @@ type MainSidebarProps = {
 }
 
 const navItems = [
-  { to: ROUTES.home, label: 'Feed', icon: Home },
-  { to: ROUTES.explore, label: 'Explore', icon: Compass },
-  { to: ROUTES.friendRequests, label: 'Friend Requests', icon: UserRoundPlus },
+  { to: ROUTES.home, label: 'Trang chủ', icon: Home },
+  { to: ROUTES.explore, label: 'Khám phá', icon: Compass },
+  { to: ROUTES.friendRequests, label: 'Lời mời kết bạn', icon: UserRoundPlus },
   { to: ROUTES.stories, label: 'Stories', icon: Clapperboard },
-  { to: ROUTES.profile('me'), label: 'Profile', icon: User },
+  { to: ROUTES.profile('me'), label: 'Hồ sơ', icon: User },
 ]
 
 export function MainSidebar({ onCreatePost, showAdmin }: MainSidebarProps) {
@@ -37,8 +37,8 @@ export function MainSidebar({ onCreatePost, showAdmin }: MainSidebarProps) {
                 end={item.to === ROUTES.home}
                 className={({ isActive }) =>
                   isActive
-                    ? 'flex items-center gap-3 rounded-2xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800 dark:bg-ink-800 dark:text-brand-300'
-                    : 'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800'
+                    ? 'flex items-center gap-3 rounded-2xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800 dark:bg-ink-100 dark:text-brand-300'
+                    : 'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-600'
                 }
               >
                 <item.icon size={16} />
@@ -46,15 +46,6 @@ export function MainSidebar({ onCreatePost, showAdmin }: MainSidebarProps) {
               </NavLink>
             ))}
           </nav>
-
-          <button
-            type="button"
-            onClick={onCreatePost}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-brand px-4 py-3 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5"
-          >
-            <PlusSquare size={16} />
-            Create Post
-          </button>
         </div>
       </aside>
 

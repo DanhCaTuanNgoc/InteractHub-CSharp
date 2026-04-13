@@ -29,7 +29,7 @@ public static class MappingExtensions
         };
     }
 
-    public static PostResponse ToPostResponse(this Post post, bool includeOriginalPost = true)
+    public static PostResponse ToPostResponse(this Post post, string? currentUserId = null, bool includeOriginalPost = true)
     {
         return new PostResponse
         {
@@ -39,9 +39,11 @@ public static class MappingExtensions
             CreatedAt = post.CreatedAt,
             OriginalPostId = post.OriginalPostId,
             OriginalPost = includeOriginalPost && post.OriginalPost is not null
-                ? post.OriginalPost.ToPostResponse(false)
+                ? post.OriginalPost.ToPostResponse(currentUserId, false)
                 : null,
             LikeCount = post.Likes.Count,
+            IsLikedByCurrentUser = !string.IsNullOrWhiteSpace(currentUserId)
+                && post.Likes.Any(l => l.UserId == currentUserId),
             CommentCount = post.Comments.Count,
             User = post.User.ToUserSummary(),
             Hashtags = post.PostHashtags.Select(x => x.Hashtag.Name).ToList(),

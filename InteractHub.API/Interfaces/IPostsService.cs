@@ -6,8 +6,8 @@ namespace InteractHub.API.Interfaces;
 
 public interface IPostsService
 {
-    Task<PagedResult<PostResponse>> GetFeedAsync(int page, int pageSize);
-    Task<PostResponse?> GetByIdAsync(Guid id);
+    Task<PagedResult<PostResponse>> GetFeedAsync(int page, int pageSize, string currentUserId);
+    Task<PostResponse?> GetByIdAsync(Guid id, string currentUserId);
     Task<PostResponse> CreateAsync(string userId, CreatePostRequest request);
     Task<PostResponse?> UpdateAsync(Guid id, string userId, bool isAdmin, UpdatePostRequest request);
     Task<bool> DeleteAsync(Guid id, string userId, bool isAdmin);

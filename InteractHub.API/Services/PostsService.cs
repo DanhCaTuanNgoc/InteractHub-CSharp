@@ -36,7 +36,7 @@ public class PostsService : IPostsService
         _notificationsService = notificationsService;
     }
 
-    public async Task<PagedResult<PostResponse>> GetFeedAsync(int page, int pageSize)
+    public async Task<PagedResult<PostResponse>> GetFeedAsync(int page, int pageSize, string currentUserId)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 50);
@@ -51,14 +51,14 @@ public class PostsService : IPostsService
             .Take(pageSize)
             .ToListAsync();
 
-        var items = posts.Select(p => p.ToPostResponse()).ToList();
+        var items = posts.Select(p => p.ToPostResponse(currentUserId)).ToList();
         return PagedResult<PostResponse>.Create(items, page, pageSize, totalCount);
     }
 
-    public async Task<PostResponse?> GetByIdAsync(Guid id)
+    public async Task<PostResponse?> GetByIdAsync(Guid id, string currentUserId)
     {
         var post = await BuildPostQuery().FirstOrDefaultAsync(p => p.Id == id);
-        return post?.ToPostResponse();
+        return post?.ToPostResponse(currentUserId);
     }
 
     public async Task<PostResponse> CreateAsync(string userId, CreatePostRequest request)
@@ -77,7 +77,7 @@ public class PostsService : IPostsService
         await SyncHashtagsAsync(post.Id, post.Content);
 
         var created = await BuildPostQuery().FirstAsync(p => p.Id == post.Id);
-        return created.ToPostResponse();
+        return created.ToPostResponse(userId);
     }
 
     public async Task<PostResponse?> UpdateAsync(Guid id, string userId, bool isAdmin, UpdatePostRequest request)
@@ -102,7 +102,7 @@ public class PostsService : IPostsService
         await SyncHashtagsAsync(post.Id, post.Content);
 
         var updated = await BuildPostQuery().FirstAsync(p => p.Id == post.Id);
-        return updated.ToPostResponse();
+        return updated.ToPostResponse(userId);
     }
 
     public async Task<bool> DeleteAsync(Guid id, string userId, bool isAdmin)
@@ -199,11 +199,6 @@ public class PostsService : IPostsService
             return null;
         }
 
-        if (post.UserId == userId)
-        {
-            throw new InvalidOperationException("Bạn không thể thích bài viết của chính mình.");
-        }
-
         var existing = await _likesRepository.Query()
             .FirstOrDefaultAsync(l => l.PostId == id && l.UserId == userId);
 
@@ -233,7 +228,7 @@ public class PostsService : IPostsService
                 "Bài viết của bạn vừa được thích.");
         }
 
-        return updated.ToPostResponse();
+        return updated.ToPostResponse(userId);
     }
 
     public async Task<CommentResponse?> AddCommentAsync(Guid id, string userId, AddCommentRequest request)
@@ -312,7 +307,7 @@ public class PostsService : IPostsService
         }
 
         var created = await BuildPostQuery().FirstAsync(p => p.Id == sharedPost.Id);
-        return created.ToPostResponse();
+        return created.ToPostResponse(userId);
     }
 
     public async Task<bool> ReportAsync(Guid id, string userId, CreateReportRequest request)

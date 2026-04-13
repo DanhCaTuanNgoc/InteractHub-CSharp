@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, MessageCircle, Send } from 'lucide-react'
+import { Hash, Heart, MessageCircle, Send } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import type { Post } from '../../types/post'
@@ -9,16 +9,18 @@ import { LazyImage } from '../common/LazyImage'
 type PostCardProps = {
   post: Post
   onLike: (postId: string) => void
+  onShare: (postId: string) => void
   onOpenComments: (post: Post) => void
 }
 
 const CAPTION_PREVIEW_LENGTH = 128
 
-export function PostCard({ post, onLike, onOpenComments }: PostCardProps) {
+export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProps) {
   const [expandedCaption, setExpandedCaption] = useState(false)
-  const [liked, setLiked] = useState(false)
   const [likeAnimationKey, setLikeAnimationKey] = useState(0)
   const [heartBurstVisible, setHeartBurstVisible] = useState(false)
+  const [displayLiked, setDisplayLiked] = useState(post.isLikedByCurrentUser)
+  const liked = displayLiked
 
   const caption = (post.content ?? '').trim()
   const originalPost = post.originalPost ?? null
@@ -31,13 +33,15 @@ export function PostCard({ post, onLike, onOpenComments }: PostCardProps) {
     return `${caption.slice(0, CAPTION_PREVIEW_LENGTH).trimEnd()}...`
   }, [caption, expandedCaption, hasLongCaption])
 
-  const handleLikeToggle = () => {
-    if (liked) {
-      return
-    }
+  useEffect(() => {
+    setDisplayLiked(post.isLikedByCurrentUser)
+  }, [post.id, post.isLikedByCurrentUser])
 
-    setLiked(true)
-    setLikeAnimationKey((value) => value + 1)
+  const handleLikeToggle = () => {
+    setDisplayLiked((value) => !value)
+    if (!liked) {
+      setLikeAnimationKey((value) => value + 1)
+    }
     onLike(post.id)
   }
 
@@ -46,7 +50,6 @@ export function PostCard({ post, onLike, onOpenComments }: PostCardProps) {
     setTimeout(() => setHeartBurstVisible(false), 700)
 
     if (!liked) {
-      setLiked(true)
       setLikeAnimationKey((value) => value + 1)
       onLike(post.id)
     }
@@ -113,6 +116,21 @@ export function PostCard({ post, onLike, onOpenComments }: PostCardProps) {
           </p>
         ) : null}
 
+        {post.hashtags.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {post.hashtags.map((tag) => (
+              <button
+                key={`${post.id}-${tag}`}
+                type="button"
+                className="inline-flex items-center gap-1 rounded-full border border-brand-200/70 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700 transition hover:border-brand-400 hover:bg-brand-100 dark:border-brand-500/40 dark:bg-brand-900/20 dark:text-brand-200 dark:hover:bg-brand-900/35"
+              >
+                <Hash size={12} />
+                {tag}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         {originalPost ? (
           <section className="mt-3 rounded-xl border border-ink-200/80 bg-white/75 p-3 dark:border-ink-700 dark:bg-ink-800/75">
             <Link to={ROUTES.profile(originalPost.user.id)} className="mb-2 inline-flex items-center gap-2">
@@ -130,6 +148,19 @@ export function PostCard({ post, onLike, onOpenComments }: PostCardProps) {
             ) : (
               <p className="text-sm text-ink-500 dark:text-ink-400">Bài viết gốc không có nội dung văn bản.</p>
             )}
+
+            {originalPost.hashtags.length > 0 ? (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {originalPost.hashtags.map((tag) => (
+                  <span
+                    key={`${originalPost.id}-${tag}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-ink-200/80 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-ink-600 dark:border-ink-600 dark:bg-ink-700/70 dark:text-ink-200"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
 
             {originalPost.imageUrl ? (
               <LazyImage
@@ -170,6 +201,7 @@ export function PostCard({ post, onLike, onOpenComments }: PostCardProps) {
 
           <button
             type="button"
+            onClick={() => onShare(post.id)}
             className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
           >
             <Send className="h-5 w-5" />

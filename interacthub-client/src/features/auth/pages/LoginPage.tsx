@@ -18,18 +18,21 @@ type LoginFormValues = {
 }
 
 const REMEMBER_EMAIL_KEY = 'interacthub_remembered_email'
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [submitError, setSubmitError] = useState<string | null>(null)
+
   const {
     register,
+    watch,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid, touchedFields },
   } = useForm<LoginFormValues>({
-    mode: 'onTouched',
+    mode: 'onChange',
     defaultValues: {
       email: localStorage.getItem(REMEMBER_EMAIL_KEY) ?? '',
       password: '',
@@ -37,7 +40,19 @@ export function LoginPage() {
     },
   })
 
-  const targetPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ??
+  const identifier = watch('email') ?? ''
+  const password = watch('password') ?? ''
+  const normalizedIdentifier = identifier.trim()
+
+  const isIdentifierValid =
+    normalizedIdentifier.includes('@')
+      ? EMAIL_PATTERN.test(normalizedIdentifier)
+      : normalizedIdentifier.length >= 4
+
+  const isPasswordValid = password.length >= 8
+
+  const targetPath =
+    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ??
     ROUTES.home
 
   if (isAuthenticated) {
@@ -83,47 +98,67 @@ export function LoginPage() {
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       <section className="auth-card auth-card--narrow">
-        <p className="auth-card__eyebrow">Welcome back</p>
-        <h1>Sign in to InteractHub</h1>
-        <p>Manage your feed, stories and notifications in one place.</p>
+        <p className="auth-card__eyebrow">Chào mừng bạn quay lại</p>
+        <h1>Đăng nhập vào InteractHub</h1>
+        <p>Quản lý bảng tin, tin và thông báo của bạn tại một nơi.</p>
 
         <form className="auth-form" onSubmit={onSubmit} noValidate>
           <AuthTextField
-            label="Email or username"
+            label="Email hoặc tên người dùng"
             type="text"
-            placeholder="you@interacthub.app or your_username"
+            placeholder="vd: you@email.com hoặc username"
             autoComplete="username"
             error={errors.email?.message}
-            icon={<Mail size={18} aria-hidden="true" />}
+            hint="Nhập email hoặc tên người dùng của bạn."
+            successMessage="Hợp lệ"
+            isValid={Boolean(touchedFields.email) && !errors.email && normalizedIdentifier.length > 0 && isIdentifierValid}
+            icon={<Mail size={18} />}
             {...register('email', {
-              required: 'Email or username is required.',
+              required: 'Vui lòng nhập email hoặc tên người dùng.',
+              validate: (value) => {
+                const v = value.trim()
+                if (!v) return 'Vui lòng nhập email hoặc tên người dùng.'
+                if (v.includes('@')) {
+                  return EMAIL_PATTERN.test(v) || 'Email không hợp lệ.'
+                }
+                return v.length >= 4 || 'Tên người dùng phải có ít nhất 4 ký tự.'
+              },
             })}
           />
 
           <AuthPasswordField
-            label="Password"
+            label="Mật khẩu"
             autoComplete="current-password"
             error={errors.password?.message}
+            hint="Ít nhất 8 ký tự."
+            successMessage="Hợp lệ"
+            isValid={Boolean(touchedFields.password) && !errors.password && isPasswordValid}
             {...register('password', {
-              required: 'Password is required.',
-              minLength: { value: 8, message: 'Password must be at least 8 characters.' },
+              required: 'Vui lòng nhập mật khẩu.',
+              minLength: { value: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự.' },
             })}
           />
 
           <label className="auth-check">
             <input type="checkbox" {...register('rememberMe')} />
-            <span>Remember me</span>
+            <span>Ghi nhớ đăng nhập</span>
           </label>
 
           {submitError ? <AuthErrorMessage message={submitError} /> : null}
 
-          <Button type="submit" fullWidth busy={isSubmitting} className="auth-submit-btn">
-            Sign In
+          <Button
+            type="submit"
+            fullWidth
+            busy={isSubmitting}
+            disabled={!isValid || isSubmitting}
+            className="auth-submit-btn"
+          >
+            Đăng nhập
           </Button>
         </form>
 
         <p className="auth-card__footnote">
-          New here? <Link to={ROUTES.register}>Create an account</Link>
+          Chưa có tài khoản? <Link to={ROUTES.register}>Đăng ký ngay</Link>
         </p>
       </section>
     </motion.main>
