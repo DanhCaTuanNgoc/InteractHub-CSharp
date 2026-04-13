@@ -99,6 +99,16 @@ export function ProfileHeader({
         </div>
 
         <div className="mt-6 w-full max-w-md space-y-3">
+          {isOwnProfile ? (
+            <Button
+              type="button"
+              onClick={onEditProfile}
+              className="w-full justify-center rounded-2xl bg-cyan-600 text-white transition hover:bg-cyan-500"
+            >
+              <UserRoundPen size={16} />
+              Chỉnh sửa hồ sơ
+            </Button>
+          ) : null}
 
           {!isOwnProfile && relationshipLoading ? <p className="text-sm text-slate-500">Đang tải trạng thái kết bạn...</p> : null}
           {!isOwnProfile && relationshipError ? <p className="form-error">{relationshipError}</p> : null}

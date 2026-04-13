@@ -158,8 +158,8 @@ export function NotificationDropdown({ triggerIcon }: NotificationDropdownProps)
           >
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="font-title text-lg text-ink-900 dark:text-white">Notifications</h3>
-                <p className="text-xs text-ink-500 dark:text-ink-400">{unreadCount} unread</p>
+                <h3 className="font-title text-lg text-ink-900 dark:text-white">Thông báo</h3>
+                <p className="text-xs text-ink-500 dark:text-ink-400">{unreadCount} chưa đọc</p>
               </div>
 
               <button
@@ -169,7 +169,7 @@ export function NotificationDropdown({ triggerIcon }: NotificationDropdownProps)
                 className="ui-interactive ui-ripple-static inline-flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold text-brand-700 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-300 dark:hover:bg-ink-800"
               >
                 <CheckCheck size={13} />
-                Mark all
+                Đánh dấu đã đọc
               </button>
             </div>
 
@@ -189,7 +189,7 @@ export function NotificationDropdown({ triggerIcon }: NotificationDropdownProps)
               <motion.div layout className="max-h-96 space-y-2 overflow-y-auto pr-1">
                 {items.length === 0 ? (
                   <p className="rounded-2xl bg-ink-50 p-3 text-sm text-ink-500 dark:bg-ink-800 dark:text-ink-400">
-                    You have no notifications yet.
+                    Bạn không có thông báo nào!
                   </p>
                 ) : null}
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { AtSign, CheckCircle2, CircleAlert, Mail, UserRound } from 'lucide-react'
+import { AtSign, Mail, UserRound } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '../../../shared/components/common/Button'
