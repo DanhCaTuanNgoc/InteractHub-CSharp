@@ -366,3 +366,38 @@ Evaluation Criteria:
 • CI/CD pipeline implementation (30%)
 • Environment configuration (20%)
 • Documentation quality (20%)
+
+4 Submission Guidelines
+4.1 What to Submit
+1. Source Code:
+• Complete Visual Studio solution (.sln file)
+• All project files and dependencies
+• Git repository URL (GitHub/Azure Repos)
+• .gitignore file (exclude bin, obj, packages)
+2. Database:
+• SQL script for database creation
+• Entity Framework migration files
+• Seed data script
+3. Documentation:
+• README.md with project overview
+• Setup and installation instructions
+• Database diagram
+• API documentation or endpoints list
+• Screenshots of key features (at least 10)
+• Video demonstration (5-10 minutes, optional but recommended)
+4. Testing:
+• Test project with all test cases
+• Test coverage report
+• Test execution results
+5. Deployment:
+• Live application URL
+• CI/CD pipeline configuration
+• Deployment documentation
+• Azure resource list and configuration
+4.2 Submission Format
+• Code Repository: Share GitHub/Azure DevOps repository link with instructor
+access
+• Documentation: Submit PDF document or well-formatted README.md
+• Compressed Archive: Zip file containing all materials (max 50MB, exclude
+node_modules, bin, obj)
+• Submission Portal: Upload to designated learning management system
