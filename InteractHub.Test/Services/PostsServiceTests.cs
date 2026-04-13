@@ -120,7 +120,7 @@ public class PostsServiceTests
     }
 
     [Fact]
-    public async Task ToggleLikeAsync_ShouldThrow_WhenLikingOwnPost()
+    public async Task ToggleLikeAsync_ShouldAllowSelfLike_AndToggleWithoutNotification()
     {
         using var db = TestDbFactory.CreateInMemoryContext();
         await SeedUsersAsync(db, "owner");
@@ -135,10 +135,22 @@ public class PostsServiceTests
         await db.SaveChangesAsync();
 
         var postId = db.Posts.Single().Id;
-        var service = CreateService(db, out _);
+        var service = CreateService(db, out var notifications);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.ToggleLikeAsync(postId, "owner"));
+        var firstResult = await service.ToggleLikeAsync(postId, "owner");
+
+        Assert.NotNull(firstResult);
+        Assert.Single(db.Likes);
+
+        var secondResult = await service.ToggleLikeAsync(postId, "owner");
+
+        Assert.NotNull(secondResult);
+        Assert.Empty(db.Likes);
+        notifications.Verify(n => n.CreateAsync(
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
