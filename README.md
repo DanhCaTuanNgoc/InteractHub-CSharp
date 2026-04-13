@@ -1,10 +1,69 @@
-# InteractHub - Project Deliverables
+# InteractHub
 
-InteractHub is a full-stack social networking project built with ASP.NET Core Web API and React + TypeScript.
+> A modern social networking platform built with ASP.NET Core Web API and React + TypeScript.
 
-## 1. Project Overview
+[![Live Website](https://img.shields.io/badge/Live%20Website-Online-00A86B?style=for-the-badge&logo=azurestaticwebapps&logoColor=white)](https://nice-wave-00bd20700.7.azurestaticapps.net/)
+[![Backend](https://img.shields.io/badge/Backend-ASP.NET%20Core%208-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](#technology-stack)
+[![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=111)](#technology-stack)
+[![Database](https://img.shields.io/badge/Database-SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](#database-deliverables)
 
-### Core Features
+## Live Demo
+
+- Production website: https://nice-wave-00bd20700.7.azurestaticapps.net/
+
+## Table of Contents
+
+1. [Project Overview](#project-overview)
+2. [Technology Stack](#technology-stack)
+3. [Architecture and Flow](#architecture-and-flow)
+4. [Key Features](#key-features)
+5. [Screenshots](#screenshots-collected-in-interacthub-clientsrcassets)
+6. [Setup and Installation](#setup-and-installation)
+7. [Database Diagram](#database-diagram)
+8. [API Endpoints](#api-endpoints)
+9. [Database Deliverables](#database-deliverables)
+10. [Testing](#testing)
+11. [Deployment](#deployment)
+12. [Submission Checklist](#submission-checklist)
+
+## Project Overview
+
+InteractHub is a full-stack social media project focused on practical real-world capabilities: secure authentication, scalable API design, social graph interactions, real-time notifications, media upload, and moderation workflows.
+
+## Technology Stack
+
+### Core Technologies
+
+| Layer | Technologies |
+|---|---|
+| Frontend | ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white) ![React Query](https://img.shields.io/badge/TanStack%20Query-FF4154?style=flat&logo=reactquery&logoColor=white) ![React Router](https://img.shields.io/badge/React%20Router-CA4245?style=flat&logo=reactrouter&logoColor=white) |
+| Backend | ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core%208-512BD4?style=flat&logo=dotnet&logoColor=white) ![Entity Framework](https://img.shields.io/badge/Entity%20Framework%20Core-6C2BD9?style=flat&logo=.net&logoColor=white) ![SignalR](https://img.shields.io/badge/SignalR-512BD4?style=flat&logo=dotnet&logoColor=white) ![ASP.NET Identity](https://img.shields.io/badge/ASP.NET%20Identity-5C2D91?style=flat&logo=microsoft&logoColor=white) |
+| Database | ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white) |
+| Auth | ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white) |
+| Cloud/Deployment | ![Azure](https://img.shields.io/badge/Azure-0078D4?style=flat&logo=microsoftazure&logoColor=white) ![Azure Static Web Apps](https://img.shields.io/badge/Azure%20SWA-5E5E5E?style=flat&logo=azurestaticwebapps&logoColor=white) |
+
+### Engineering Highlights
+
+- Layered backend architecture with Services, Repositories, DTOs, and Controllers.
+- JWT-secured REST API with role-based authorization for admin routes.
+- Real-time notification delivery via SignalR hub.
+- EF Core migrations and seed strategy for reproducible database provisioning.
+- Production-ready deployment path documented for Azure.
+
+## Architecture and Flow
+
+```mermaid
+flowchart LR
+    A[React Client] -->|HTTP/JSON| B[ASP.NET Core API]
+    A -->|WebSocket/SignalR| C[Notification Hub]
+    B --> D[(SQL Server)]
+    B --> E[Identity + JWT]
+    B --> F[File Storage Uploads]
+    B --> C
+```
+
+## Key Features
+
 - User registration and login with JWT authentication.
 - Profile view and profile update.
 - News feed with pagination.
@@ -15,12 +74,7 @@ InteractHub is a full-stack social networking project built with ASP.NET Core We
 - Admin moderation endpoints for reports and post removal.
 - Image upload endpoint for media attachments.
 
-### Tech Stack
-- Backend: ASP.NET Core 8 Web API, Entity Framework Core, ASP.NET Identity, SQL Server, SignalR.
-- Frontend: React 18, TypeScript, Vite, React Query, React Router.
-- Auth: JWT Bearer.
-
-## 2. Screenshots (Collected in interacthub-client/src/assets)
+## Screenshots (Collected in interacthub-client/src/assets)
 
 > Source folder: interacthub-client/src/assets
 
@@ -88,20 +142,23 @@ InteractHub is a full-stack social networking project built with ASP.NET Core We
 
   ![Story Page](interacthub-client/src/assets/storypage_screenshot.png)
 
-## 3. Setup and Installation
+## Setup and Installation
 
-## Prerequisites
+### Prerequisites
+
 - .NET SDK 8.0+
 - Node.js 20+
 - SQL Server (or LocalDB)
 
-## Clone and Restore
+### Clone and Restore
+
 ```bash
 git clone <your-repository-url>
 cd InteractHub
 ```
 
-## Backend Setup (InteractHub.API)
+### Backend Setup (InteractHub.API)
+
 1. Update connection string in `InteractHub.API/appsettings.json` if needed.
 2. Restore and run API:
 
@@ -119,7 +176,8 @@ Swagger UI:
 - http://localhost:5191/swagger
 - https://localhost:7298/swagger
 
-## Frontend Setup (interacthub-client)
+### Frontend Setup (interacthub-client)
+
 1. Open a new terminal and run:
 
 ```bash
@@ -137,14 +195,15 @@ VITE_API_BASE_URL=http://localhost:5191/api
 Default frontend URL:
 - http://localhost:5173
 
-## Seed Data Behavior
-- On API startup, `DbSeeder` automatically applies migrations and inserts:
-  - Roles: User, Admin
-  - Default admin account: admin@interacthub.local
-  - Default demo account: demo@interacthub.local
-  - One initial sample post (if no posts exist)
+### Seed Data Behavior
 
-## 4. Database Diagram
+On API startup, `DbSeeder` automatically applies migrations and inserts:
+- Roles: User, Admin
+- Default admin account: admin@interacthub.local
+- Default demo account: demo@interacthub.local
+- One initial sample post (if no posts exist)
+
+## Database Diagram
 
 ```mermaid
 erDiagram
@@ -166,7 +225,7 @@ erDiagram
     Posts ||--o{ Posts : shared_from
 ```
 
-## 5. API Endpoints List
+## API Endpoints
 
 Base URL: `/api`
 
@@ -222,18 +281,21 @@ Base URL: `/api`
 ### SignalR Hub
 - `GET /hubs/notifications` - Notification hub endpoint (JWT required).
 
-## 6. Database Deliverables
+## Database Deliverables
 
 ### SQL Script for Database Creation
+
 - `docs/database/create-database.sql`
 
 Generated from EF migrations by command:
+
 ```bash
 cd InteractHub.API
 dotnet ef migrations script 0 --output ../docs/database/create-database.sql
 ```
 
 ### Entity Framework Migration Files
+
 - `InteractHub.API/Data/Migrations/20260331040119_InitialCreate.cs`
 - `InteractHub.API/Data/Migrations/20260331040134_SeedRoles.cs`
 - `InteractHub.API/Data/Migrations/20260331040146_AddIndexes.cs`
@@ -241,12 +303,79 @@ dotnet ef migrations script 0 --output ../docs/database/create-database.sql
 - `InteractHub.API/Data/Migrations/AppDbContextModelSnapshot.cs`
 
 ### Seed Data Script
+
 - `docs/database/seed-data.sql`
 
-## 7. Submission Checklist
-- README with setup instructions and screenshots: completed.
-- Database diagram: completed.
-- API endpoints documentation: completed.
-- SQL database creation script: completed.
-- EF migration files: included in project.
-- Seed data script: completed.
+## Testing
+
+### Test Project With All Test Cases
+
+- Test project: `InteractHub.Test/InteractHub.Test.csproj`
+- Covered service test suites:
+  - `InteractHub.Test/Services/AdminServiceTests.cs`
+  - `InteractHub.Test/Services/AuthServiceTests.cs`
+  - `InteractHub.Test/Services/FriendsServiceTests.cs`
+  - `InteractHub.Test/Services/HashtagServiceTests.cs`
+  - `InteractHub.Test/Services/JwtTokenServiceTests.cs`
+  - `InteractHub.Test/Services/NotificationsServiceTests.cs`
+  - `InteractHub.Test/Services/PostsServiceTests.cs`
+  - `InteractHub.Test/Services/StoriesServiceTests.cs`
+  - `InteractHub.Test/Services/UsersServiceTests.cs`
+
+### Test Coverage Report
+
+- Coverage artifact (Cobertura): `docs/testing/coverage.cobertura.xml`
+- Current summary:
+  - Line coverage: 13.14% (746/5674)
+  - Branch coverage: 20.30% (67/330)
+
+### Test Execution Results
+
+- Test result artifact: `docs/testing/test-results.trx`
+- Detailed report: `docs/testing/testing-report.md`
+- Current run summary:
+  - Total tests: 35
+  - Passed: 35
+  - Failed: 0
+  - Duration: 11.8s
+
+## Deployment
+
+### Live Application URL
+
+- https://nice-wave-00bd20700.7.azurestaticapps.net/
+
+### CI/CD Pipeline Configuration
+
+- Pipeline workflow: `.github/workflows/azure-deploy.yml`
+- Main jobs:
+  - `build-and-test`
+  - `deploy-api`
+  - `deploy-frontend`
+
+### Deployment Documentation
+
+- Deployment guide: `docs/deployment-azure.md`
+
+### Azure Resource List and Configuration
+
+- Resource list and required configurations are documented in:
+  - `docs/deployment-azure.md`
+
+## Submission Checklist
+
+- README with setup instructions and screenshots.
+- Database diagram.
+- API endpoints documentation.
+- SQL database creation script.
+- EF migration files.
+- Seed data script.
+- Testing:
+  - Test project with all test cases.
+  - Test coverage report.
+  - Test execution results.
+- Deployment:
+  - Live application URL.
+  - CI/CD pipeline configuration.
+  - Deployment documentation.
+  - Azure resource list and configuration.

@@ -1,80 +1,137 @@
 # InteractHub Deployment Guide (Azure)
 
-## 1) Muc tieu
-Tai lieu nay huong dan deploy InteractHub len Azure theo quy trinh chuan de dat D1:
-- App live tren Azure URL
-- Co CI/CD pipeline YAML
-- Azure SQL va Blob duoc cau hinh dung
-- Co tai lieu trien khai co bang chung
+## 1) Objective
 
-## 2) Kien truc production
-- Backend API: Azure App Service
-- Frontend React: Azure Static Web Apps (khuyen nghi)
+This document describes the deployment setup for InteractHub on Azure and provides evidence-oriented checkpoints for project submission.
+
+Required outcomes:
+- Live application URL
+- CI/CD pipeline configuration
+- Deployment documentation
+- Azure resource list and configuration
+
+## 2) Live Application URL
+
+- Frontend production URL:
+	- https://nice-wave-00bd20700.7.azurestaticapps.net/
+
+## 3) Production Architecture
+
+- Frontend: Azure Static Web Apps
+- Backend API: Azure App Service (.NET 8)
 - Database: Azure SQL Database
-- File upload: Azure Blob Storage
+- File storage: Azure Blob Storage
 - Monitoring: Application Insights
 
-## 3) Tao tai nguyen Azure
-Tao theo thu tu:
-1. Resource Group
-2. SQL Server + SQL Database
-3. Storage Account + Blob container uploads
-4. App Service Plan + Web App (.NET 8)
-5. Application Insights
-6. Static Web App cho frontend
+## 4) CI/CD Pipeline Configuration
 
-## 4) Cau hinh cho API (App Service)
-Them cac bien moi truong trong App Service > Settings > Environment variables:
+Pipeline file:
+- .github/workflows/azure-deploy.yml
+
+Workflow jobs:
+- build-and-test
+	- Restore and build API + test project
+	- Run test project
+	- Build frontend with VITE_API_BASE_URL
+- deploy-api
+	- Publish API
+	- Deploy to Azure App Service using publish profile
+- deploy-frontend
+	- Deploy frontend to Azure Static Web Apps
+
+Pipeline trigger:
+- push on branches main/master
+- manual trigger via workflow_dispatch
+
+## 5) Azure Resource List
+
+Create resources in this order:
+1. Resource Group
+2. Azure SQL logical server
+3. Azure SQL Database
+4. Storage Account
+5. Blob Container (uploads)
+6. App Service Plan
+7. Web App (API)
+8. Application Insights
+9. Azure Static Web App (Frontend)
+
+## 6) Azure Resource Configuration
+
+### 6.1 API App Service - Environment Variables
+
+Configure in App Service -> Settings -> Environment variables:
 - ConnectionStrings__DefaultConnection
-- AzureBlob__ConnectionString
-- AzureBlob__ContainerName=uploads
+- BlobStorage__ConnectionString
+- BlobStorage__ContainerName
+- BlobStorage__BaseFolder
 - Jwt__Secret
 - Jwt__Issuer
 - Jwt__Audience
+- FileStorage__PublicBaseUrl
+- FileStorage__RequestPath
+- Cors__AllowedOrigins__0
 - ASPNETCORE_ENVIRONMENT=Production
-- Cors__AllowedOrigins__0=<frontend-production-url>
 
-Khong commit cac gia tri nay vao git.
+Security note:
+- Never commit production secrets into source control.
 
-## 5) Cau hinh GitHub Secrets
-Trong GitHub repository > Settings > Secrets and variables > Actions, tao:
-- AZURE_WEBAPP_NAME
+### 6.2 Frontend Static Web App - Build Variables
+
+- VITE_API_BASE_URL=https://<api-app-name>.azurewebsites.net/api
+
+### 6.3 Azure SQL
+
+- Allow App Service outbound access through firewall/network rules.
+- Ensure DB connection string in production points to Azure SQL.
+- Apply migrations before/after first deploy.
+
+### 6.4 Azure Blob Storage
+
+- Create container for media uploads.
+- Ensure API has valid connection string + container name.
+
+## 7) GitHub Secrets Configuration
+
+In GitHub repository -> Settings -> Secrets and variables -> Actions:
 - AZURE_WEBAPP_PUBLISH_PROFILE
 - AZURE_STATIC_WEB_APPS_API_TOKEN
 - VITE_API_BASE_URL
 
-Pipeline da duoc dat tai .github/workflows/azure-deploy.yml
+Optional:
+- AZURE_WEBAPP_NAME (if needed by custom deployment logic)
 
-## 6) Chay migration len Azure SQL
-Tren may local (hoac pipeline release), dam bao bien moi truong trung voi production roi chay:
+## 8) Database Migration for Production
+
+Run migration against production connection settings:
 
 ```bash
 dotnet tool install --global dotnet-ef
 dotnet ef database update --project InteractHub.API --startup-project InteractHub.API
 ```
 
-## 7) Kich hoat pipeline
-- Push code vao nhanh main
-- Vao tab Actions kiem tra workflow CI-CD Azure Deploy
-- Dam bao 3 jobs pass: build-and-test, deploy-api, deploy-frontend
+## 9) Deployment Validation (Smoke Test)
 
-## 8) Smoke test production
-1. Truy cap Swagger: https://<api-app-name>.azurewebsites.net/swagger
-2. Kiem tra login/register
-3. Kiem tra endpoint can Authorize
-4. Kiem tra upload anh va file da len Blob
-5. Kiem tra frontend goi dung API production
+1. Open frontend production URL.
+2. Open API Swagger:
+	 - https://<api-app-name>.azurewebsites.net/swagger
+3. Validate register/login.
+4. Validate authorized endpoints.
+5. Validate image upload and blob object creation.
+6. Validate realtime notifications flow.
 
-## 9) Bang chung can chup man hinh
-- Workflow run thanh cong
-- App Service URL dang running
-- SQL Database Overview
-- Blob container co file that upload
-- Swagger production va frontend production
+## 10) Submission Evidence Checklist
 
-## 10) Tieu chi hoan thanh D1
-Danh dau hoan thanh khi du 4 muc:
-- App live tren Azure URL
-- CI/CD pipeline YAML
-- Azure SQL + Blob configured
-- Deployment documentation
+- Successful GitHub Actions workflow run.
+- Live frontend URL is accessible.
+- API Swagger in production is accessible.
+- Azure SQL database is provisioned.
+- Blob container contains uploaded file objects.
+- Deployment variables/secrets are configured.
+
+## 11) Deliverable Mapping
+
+- Live application URL: section 2
+- CI/CD pipeline configuration: section 4
+- Deployment documentation: this document
+- Azure resource list and configuration: sections 5 and 6
