@@ -88,10 +88,6 @@ flowchart LR
   ![Register](interacthub-client/src/assets/register_screenshot.png)
 
 ### Home and Feed
-- Hero section
-
-  ![Hero](interacthub-client/src/assets/hero.png)
-
 - Homepage
 
   ![Homepage](interacthub-client/src/assets/homepage_screenshot.png)
