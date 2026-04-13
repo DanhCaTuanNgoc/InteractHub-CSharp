@@ -79,7 +79,7 @@ export function ProfileHeader({
           </p>
         </div>
 
-        <div className="mt-6 grid w-full max-w-md grid-cols-3 gap-3">
+        <div className={`mt-6 grid w-full max-w-md gap-3 ${isOwnProfile ? 'grid-cols-2' : 'grid-cols-3'}`}>
           <div className="rounded-2xl bg-white/80 px-3 py-4 shadow-sm">
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{postCount}</p>
             <p className="text-xs uppercase tracking-wide text-slate-500">Bài đăng</p>
@@ -88,14 +88,16 @@ export function ProfileHeader({
             <p className="text-xl font-bold text-slate-900 sm:text-2xl">{storyCount}</p>
             <p className="text-xs uppercase tracking-wide text-slate-500">Tin</p>
           </div>
-          <div className="rounded-2xl bg-white/80 px-3 py-4 shadow-sm">
-            <p className="text-sm font-semibold text-slate-900 sm:text-lg">
-              {relationshipLabel}
-            </p>
-            <p className="text-[10px] uppercase tracking-wide text-slate-500">
-              Trạng thái
-            </p>
-          </div>
+          {!isOwnProfile ? (
+            <div className="rounded-2xl bg-white/80 px-3 py-4 shadow-sm">
+              <p className="text-sm font-semibold text-slate-900 sm:text-lg">
+                {relationshipLabel}
+              </p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-500">
+                Trạng thái
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-6 w-full max-w-md space-y-3">

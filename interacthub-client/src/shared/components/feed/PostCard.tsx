@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Hash, Heart, MessageCircle, Send } from 'lucide-react'
+import { Heart, MessageCircle, Send } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import type { Post } from '../../types/post'
@@ -124,7 +124,6 @@ export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProp
                 type="button"
                 className="inline-flex items-center gap-1 rounded-full border border-brand-200/70 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700 transition hover:border-brand-400 hover:bg-brand-100 dark:border-brand-500/40 dark:bg-brand-900/20 dark:text-brand-200 dark:hover:bg-brand-900/35"
               >
-                <Hash size={12} />
                 {tag}
               </button>
             ))}

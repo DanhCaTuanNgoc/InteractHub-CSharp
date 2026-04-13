@@ -1,8 +1,6 @@
-import { Clapperboard, Compass, Home, PlusSquare, Shield, User, UserRoundPlus } from 'lucide-react'
+import { Clapperboard, Compass, Home, Shield, User, UserRoundPlus } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
-import { Button } from '../common/Button'
-
 type MainSidebarProps = {
   onCreatePost: () => void
   showAdmin: boolean
@@ -16,7 +14,7 @@ const navItems = [
   { to: ROUTES.profile('me'), label: 'Hồ sơ', icon: User },
 ]
 
-export function MainSidebar({ onCreatePost, showAdmin }: MainSidebarProps) {
+export function MainSidebar({ showAdmin }: MainSidebarProps) {
   const allNavItems = showAdmin
     ? [...navItems, { to: ROUTES.admin, label: 'Admin', icon: Shield }]
     : navItems
@@ -29,15 +27,6 @@ export function MainSidebar({ onCreatePost, showAdmin }: MainSidebarProps) {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">InteractHub</p>
             <h1 className="mt-2 font-title text-2xl text-ink-900 dark:text-white">Social Studio</h1>
           </div>
-
-          <Button
-            type="button"
-            onClick={onCreatePost}
-            className="w-full justify-center rounded-2xl bg-brand-600 text-white transition hover:bg-brand-500"
-          >
-            <PlusSquare size={16} />
-            Tạo bài viết
-          </Button>
 
           <nav className="space-y-1">
             {allNavItems.map((item) => (
