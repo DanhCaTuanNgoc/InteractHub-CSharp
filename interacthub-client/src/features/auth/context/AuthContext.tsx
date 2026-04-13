@@ -16,6 +16,7 @@ import {
   setStoredUser,
   type AuthUser,
 } from '../../../shared/auth/tokenStorage'
+import { userService } from '../../../shared/services/userService'
 
 type LoginPayload = {
   accessToken: string
@@ -28,6 +29,7 @@ type AuthContextValue = {
   isAuthenticated: boolean
   hasRole: (role: string) => boolean
   login: (payload: LoginPayload) => void
+  updateUser: (patch: Partial<Pick<AuthUser, 'username' | 'fullName' | 'avatarUrl'>>) => void
   logout: () => void
 }
 
@@ -56,6 +58,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setUser(userWithRoles)
   }, [])
 
+  const updateUser = useCallback((patch: Partial<Pick<AuthUser, 'username' | 'fullName' | 'avatarUrl'>>) => {
+    setUser((current) => {
+      if (!current) {
+        return current
+      }
+
+      const nextUser: AuthUser = {
+        ...current,
+        ...patch,
+      }
+
+      setStoredUser(nextUser)
+      return nextUser
+    })
+  }, [])
+
   useEffect(() => {
     if (!accessToken || !user) {
       return
@@ -74,6 +92,47 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setStoredUser(nextUser)
     setUser(nextUser)
   }, [accessToken, user])
+
+  useEffect(() => {
+    if (!accessToken || !user?.id) {
+      return
+    }
+
+    let cancelled = false
+
+    const syncProfile = async () => {
+      try {
+        const profile = await userService.getProfile(user.id)
+        if (cancelled) {
+          return
+        }
+
+        setUser((current) => {
+          if (!current) {
+            return current
+          }
+
+          const nextUser: AuthUser = {
+            ...current,
+            username: profile.userName,
+            fullName: profile.fullName,
+            avatarUrl: profile.avatarUrl ?? null,
+          }
+
+          setStoredUser(nextUser)
+          return nextUser
+        })
+      } catch {
+        // Keep current auth user if profile sync fails.
+      }
+    }
+
+    void syncProfile()
+
+    return () => {
+      cancelled = true
+    }
+  }, [accessToken, user?.id])
 
   const hasRole = useCallback(
     (role: string) => {
@@ -103,9 +162,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isAuthenticated: Boolean(accessToken && user),
       hasRole,
       login,
+      updateUser,
       logout,
     }),
-    [user, accessToken, hasRole, login, logout],
+    [user, accessToken, hasRole, login, updateUser, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

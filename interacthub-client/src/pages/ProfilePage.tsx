@@ -37,7 +37,7 @@ type NoticeState = {
 
 export function ProfilePage() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const [activeTab, setActiveTab] = useState<ProfileTabKey>('posts')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -198,6 +198,13 @@ export function ProfilePage() {
       })
 
       setProfile(updated)
+      if (isOwnProfile) {
+        updateUser({
+          username: updated.userName,
+          fullName: updated.fullName,
+          avatarUrl: updated.avatarUrl ?? null,
+        })
+      }
       showNotice({
         type: 'success',
         title: 'Cập nhật thành công',

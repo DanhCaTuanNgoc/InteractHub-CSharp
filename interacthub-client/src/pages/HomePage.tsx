@@ -33,7 +33,7 @@ export function HomePage() {
     <header className="overflow-hidden rounded-3xl border border-ink-200/70 bg-white/70 p-4 shadow-soft backdrop-blur-xl dark:border-ink-700 dark:bg-ink-900/75">
       <div className="rounded-2xl border border-ink-200/70 bg-white/75 p-3 shadow-soft dark:border-ink-700 dark:bg-ink-900/70">
         <div className="flex items-center gap-3">
-          <Avatar src={user?.avatarUrl} alt={user?.fullName ?? user?.username ?? 'User'} />
+          <Avatar src={user?.avatarUrl ?? null} alt={user?.fullName ?? user?.username ?? 'User'} />
 
           <button
             type="button"
