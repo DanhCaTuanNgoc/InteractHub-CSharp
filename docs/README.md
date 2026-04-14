@@ -357,15 +357,19 @@ dotnet ef migrations script 0 --output ../docs/database/create-database.sql
   - `build-and-test`
   - `deploy-api`
   - `deploy-frontend`
+- Trigger:
+  - Push to `main`/`master`
+  - Manual run via `workflow_dispatch`
 
 ### Deployment Documentation
 
-- Deployment guide: `docs/deployment-azure.md`
+- Deployment guide: `docs/deployment/deployment-azure.md`
 
 ### Azure Resource List and Configuration
 
-- Resource list and required configurations are documented in:
-  - `docs/deployment-azure.md`
+- Azure resource list (dedicated): `docs/azure-resource-list.md`
+- Detailed deployment configuration: `docs/deployment/deployment-azure.md`
+- Note: Subscription-level item is excluded from the resource inventory; only project resources are listed.
 
 ## Submission Checklist
 
