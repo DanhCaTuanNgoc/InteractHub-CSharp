@@ -2,14 +2,18 @@
 
 > A modern social networking platform built with ASP.NET Core Web API and React + TypeScript.
 
-[![Live Website](https://img.shields.io/badge/Live%20Website-Online-00A86B?style=for-the-badge&logo=azurestaticwebapps&logoColor=white)](https://nice-wave-00bd20700.7.azurestaticapps.net/)
+[![Live Website](https://img.shields.io/badge/Live%20Website-Historical%20Deployment-808080?style=for-the-badge&logo=azurestaticwebapps&logoColor=white)](https://nice-wave-00bd20700.7.azurestaticapps.net/)
 [![Backend](https://img.shields.io/badge/Backend-ASP.NET%20Core%208-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](#technology-stack)
 [![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=111)](#technology-stack)
 [![Database](https://img.shields.io/badge/Database-SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](#database-deliverables)
 
 ## Live Demo
 
-- Production website: https://nice-wave-00bd20700.7.azurestaticapps.net/
+- Historical production website: https://nice-wave-00bd20700.7.azurestaticapps.net/
+- Current status: domain is no longer active because the Azure free trial has ended.
+- Deployment proof screenshots:
+  - interacthub-client/src/assets/staticweb_azure_screenshot.png
+  - interacthub-client/src/assets/webapp_azure_screenshot.png
 
 ## Table of Contents
 

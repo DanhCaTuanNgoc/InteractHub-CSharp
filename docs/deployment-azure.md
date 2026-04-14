@@ -12,8 +12,12 @@ Required outcomes:
 
 ## 2) Live Application URL
 
-- Frontend production URL:
+- Frontend production URL (historical):
 	- https://nice-wave-00bd20700.7.azurestaticapps.net/
+
+Status note:
+- The domain is currently no longer active because the Azure free trial has ended.
+- The deployment was previously successful and verified when the environment was active.
 
 ## 3) Production Architecture
 
@@ -123,13 +127,29 @@ dotnet ef database update --project InteractHub.API --startup-project InteractHu
 ## 10) Submission Evidence Checklist
 
 - Successful GitHub Actions workflow run.
-- Live frontend URL is accessible.
+- Live frontend URL was accessible during the active Azure subscription period.
 - API Swagger in production is accessible.
 - Azure SQL database is provisioned.
 - Blob container contains uploaded file objects.
 - Deployment variables/secrets are configured.
 
-## 11) Deliverable Mapping
+## 11) Deployment Evidence (Screenshots)
+
+The screenshots below were captured from the successful Azure deployment stage before the free trial expired.
+
+- Azure Static Web App deployment evidence:
+
+	![Azure Static Web App Deployment](../interacthub-client/src/assets/staticweb_azure_screenshot.png)
+
+- Azure App Service (Web App API) deployment evidence:
+
+	![Azure App Service Deployment](../interacthub-client/src/assets/webapp_azure_screenshot.png)
+
+Important note:
+- The previous production domain has now stopped due to subscription limits.
+- This does not change the fact that deployment was completed and working before expiration.
+
+## 12) Deliverable Mapping
 
 - Live application URL: section 2
 - CI/CD pipeline configuration: section 4
