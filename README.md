@@ -12,8 +12,13 @@
 - Historical production website: https://nice-wave-00bd20700.7.azurestaticapps.net/
 - Current status: domain is no longer active because the Azure free trial has ended.
 - Deployment proof screenshots:
-  - interacthub-client/src/assets/staticweb_azure_screenshot.png
-  - interacthub-client/src/assets/webapp_azure_screenshot.png
+  - Azure Static Web App:
+
+    ![Azure Static Web App Deployment Proof](interacthub-client/src/assets/staticweb_azure_screenshot.png)
+
+  - Azure App Service (Web App API):
+
+    ![Azure App Service Deployment Proof](interacthub-client/src/assets/webapp_azure_screenshot.png)
 
 ## Table of Contents
 
