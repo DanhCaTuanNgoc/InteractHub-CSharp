@@ -21,6 +21,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "interacthub-client", "inter
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "51355"
+		SlnRelativePath = "interacthub-client\"
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InteractHub.API", "InteractHub.API\InteractHub.API.csproj", "{115A259A-968C-197E-9C09-CD68606D8DEA}"
@@ -48,5 +49,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B0C78433-8B72-4ABC-9D0D-FD96974F60E5}
 	EndGlobalSection
 EndGlobal

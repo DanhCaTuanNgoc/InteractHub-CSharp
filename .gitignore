@@ -3,3 +3,5 @@ bin/
 obj/
 *.user
 *.suo
+submission_stage/
+_submission_stage/
