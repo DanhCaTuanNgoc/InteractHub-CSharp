@@ -5,6 +5,7 @@ import type { Post } from '../../types/post'
 
 type FeedProps = {
   posts: Post[]
+  currentUserId?: string
   isLoading: boolean
   error: unknown
   hasNextPage: boolean | undefined
@@ -12,11 +13,13 @@ type FeedProps = {
   onLoadMore: () => void
   onLike: (postId: string) => void
   onShare: (postId: string) => void
+  onReport: (postId: string, reason: string) => Promise<void>
   onOpenComments: (post: Post) => void
 }
 
 export function Feed({
   posts,
+  currentUserId,
   isLoading,
   error,
   hasNextPage,
@@ -24,6 +27,7 @@ export function Feed({
   onLoadMore,
   onLike,
   onShare,
+  onReport,
   onOpenComments,
 }: FeedProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -74,7 +78,15 @@ export function Feed({
   return (
     <section className="space-y-4">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onLike={onLike} onShare={onShare} onOpenComments={onOpenComments} />
+        <PostCard
+          key={post.id}
+          post={post}
+          currentUserId={currentUserId}
+          onLike={onLike}
+          onShare={onShare}
+          onReport={onReport}
+          onOpenComments={onOpenComments}
+        />
       ))}
 
       <div ref={sentinelRef} className="h-8" />

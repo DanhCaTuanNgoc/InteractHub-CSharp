@@ -104,6 +104,10 @@ export function usePosts() {
     },
   })
 
+  const reportPostMutation = useMutation({
+    mutationFn: ({ postId, reason }: { postId: string; reason: string }) => postService.report(postId, reason),
+  })
+
   const posts = feedQuery.data?.pages.flatMap((page) => page.items) ?? []
 
   return {
@@ -113,5 +117,6 @@ export function usePosts() {
     toggleLike: toggleLikeMutation,
     addComment: addCommentMutation,
     sharePost: sharePostMutation,
+    reportPost: reportPostMutation,
   }
 }

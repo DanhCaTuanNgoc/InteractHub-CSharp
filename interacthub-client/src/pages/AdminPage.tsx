@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ShieldCheck } from 'lucide-react'
 import { Button } from '../shared/components/common/Button'
 import { adminService } from '../shared/services/adminService'
 import type { PostReport } from '../shared/types/postReport'
@@ -17,7 +18,7 @@ export function AdminPage() {
       const data = await adminService.getReports()
       setReports(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải danh sách report.')
+      setError(err instanceof Error ? err.message : 'Không thể tải danh sách báo cáo.')
     } finally {
       setLoading(false)
     }
@@ -34,7 +35,7 @@ export function AdminPage() {
       const updated = await adminService.resolveReport(reportId, status)
       setReports((current) => current.map((item) => (item.id === reportId ? updated : item)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể xử lý report.')
+      setError(err instanceof Error ? err.message : 'Không thể xử lý báo cáo.')
     } finally {
       setBusyReportId(null)
     }
@@ -54,10 +55,18 @@ export function AdminPage() {
   }
 
   return (
-    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
-      <article className="status-card p-4 sm:p-5 lg:p-6">
-        <h1>Admin Reports</h1>
-        <p>Xử lý report và xóa bài viết vi phạm từ backend Admin API.</p>
+    <section className="cards-section cards-section--single admin-page mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card admin-page__panel p-4 sm:p-5 lg:p-6">
+        <header className="admin-page__hero">
+          <div>
+            <p className="admin-page__eyebrow">
+              <ShieldCheck size={14} aria-hidden="true" />
+              Quản trị
+            </p>
+            <h1>Báo cáo vi phạm</h1>
+            <p>Quản lý báo cáo và xử lý bài viết vi phạm từ hệ thống quản trị.</p>
+          </div>
+        </header>
 
         <div className="mt-3">
           <Button type="button" variant="ghost" onClick={() => void loadReports()} busy={loading}>
@@ -67,29 +76,39 @@ export function AdminPage() {
 
         {error ? <p className="form-error mt-3">{error}</p> : null}
 
-        {loading ? <p className="mt-3">Đang tải reports...</p> : null}
+        {loading ? <p className="mt-3">Đang tải danh sách báo cáo...</p> : null}
 
-        {!loading && reports.length === 0 ? <p className="mt-3">Chưa có report cần xử lý.</p> : null}
+        {!loading && reports.length === 0 ? <p className="mt-3">Chưa có báo cáo cần xử lý.</p> : null}
 
-        <div className="explore-result mt-4">
+        <div className="explore-result admin-page__list mt-4">
           {reports.map((report) => (
-            <article key={report.id} className="status-card">
-              <h2>Report #{report.id.slice(0, 8)}</h2>
-              <p>
-                <strong>Status:</strong> {report.status}
-              </p>
-              <p>
-                <strong>Reason:</strong> {report.reason}
-              </p>
-              <p>
-                <strong>Reporter:</strong> {report.reporter.fullName} (@{report.reporter.userName})
-              </p>
-              <p>
-                <strong>PostId:</strong> {report.postId}
-              </p>
-              <p>
-                <strong>Created:</strong> {new Date(report.createdAt).toLocaleString()}
-              </p>
+            <article key={report.id} className="status-card admin-report-card">
+              <h2>Báo cáo #{report.id.slice(0, 8)}</h2>
+
+              <dl className="admin-report-card__meta">
+                <div>
+                  <dt>Trạng thái</dt>
+                  <dd>{report.status}</dd>
+                </div>
+                <div>
+                  <dt>Lý do</dt>
+                  <dd>{report.reason}</dd>
+                </div>
+                <div>
+                  <dt>Người báo cáo</dt>
+                  <dd>
+                    {report.reporter.fullName} (@{report.reporter.userName})
+                  </dd>
+                </div>
+                <div>
+                  <dt>Mã bài viết</dt>
+                  <dd>{report.postId}</dd>
+                </div>
+                <div>
+                  <dt>Thời gian tạo</dt>
+                  <dd>{new Date(report.createdAt).toLocaleString()}</dd>
+                </div>
+              </dl>
 
               <div className="post-card__inline-actions mt-3">
                 <Button
@@ -98,7 +117,7 @@ export function AdminPage() {
                   busy={busyReportId === report.id}
                   onClick={() => void resolve(report.id, 'Resolved')}
                 >
-                  Resolve
+                  Đã xử lý
                 </Button>
                 <Button
                   type="button"
@@ -106,7 +125,7 @@ export function AdminPage() {
                   busy={busyReportId === report.id}
                   onClick={() => void resolve(report.id, 'Rejected')}
                 >
-                  Reject
+                  Từ chối
                 </Button>
                 <Button
                   type="button"
@@ -114,7 +133,7 @@ export function AdminPage() {
                   busy={busyReportId === report.id}
                   onClick={() => void deletePost(report.id, report.postId)}
                 >
-                  Delete Post
+                  Xóa bài viết
                 </Button>
               </div>
             </article>

@@ -60,14 +60,15 @@ export function FriendRequestsPage() {
   }
 
   return (
-    <section className="cards-section cards-section--single mt-2 grid grid-cols-1 gap-4 sm:mt-4">
-      <article className="status-card friend-requests p-4 sm:p-5 lg:p-6">
+    <section className="cards-section cards-section--single friend-requests-page mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="status-card friend-requests friend-requests-page__panel p-4 sm:p-5 lg:p-6">
         <header className="friend-requests__hero">
           <div>
             <p className="friend-requests__eyebrow">
               <UserRoundPlus size={14} aria-hidden="true" />
               Kết nối
             </p>
+            <h1>Lời mời kết bạn</h1>
             <p>Danh sách lời mời kết bạn đang chờ xử lý.</p>
           </div>
 
@@ -126,7 +127,7 @@ export function FriendRequestsPage() {
                   onClick={() => void handleDecision(request, 'accept')}
                 >
                   <Check size={15} aria-hidden="true" />
-                  Accept
+                  Đồng ý
                 </Button>
                 <Button
                   type="button"
@@ -135,7 +136,7 @@ export function FriendRequestsPage() {
                   onClick={() => void handleDecision(request, 'decline')}
                 >
                   <X size={15} aria-hidden="true" />
-                  Decline
+                  Từ chối
                 </Button>
               </div>
             </article>

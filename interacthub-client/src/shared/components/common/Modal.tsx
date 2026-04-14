@@ -1,4 +1,5 @@
 import { useEffect, type MouseEvent, type PropsWithChildren } from 'react'
+import { X } from 'lucide-react'
 
 type ModalProps = PropsWithChildren<{
   open: boolean
@@ -37,8 +38,8 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
       <section className="modal">
         <header className="modal__header">
           <h3>{title}</h3>
-          <button type="button" onClick={onClose} className="button button--ghost">
-            Close
+          <button type="button" onClick={onClose} className="modal__close-btn" aria-label="Đóng">
+            <X size={16} aria-hidden="true" />
           </button>
         </header>
         <div className="modal__body">{children}</div>

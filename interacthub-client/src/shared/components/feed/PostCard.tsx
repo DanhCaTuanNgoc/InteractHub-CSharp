@@ -1,26 +1,39 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, MessageCircle, Send } from 'lucide-react'
+import { Ellipsis, Flag, Heart, MessageCircle, Send } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
 import type { Post } from '../../types/post'
+import { Button } from '../common/Button'
 import { LazyImage } from '../common/LazyImage'
+import { Modal } from '../common/Modal'
 
 type PostCardProps = {
   post: Post
+  currentUserId?: string
   onLike: (postId: string) => void
   onShare: (postId: string) => void
   onOpenComments: (post: Post) => void
+  onReport: (postId: string, reason: string) => Promise<void>
 }
+
+const REPORT_REASON_OPTIONS = ['Spam', 'Nội dung quấy rối', 'Thông tin sai lệch', 'Ngôn từ thù ghét', 'Khác']
 
 const CAPTION_PREVIEW_LENGTH = 128
 
-export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProps) {
+export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments, onReport }: PostCardProps) {
   const [expandedCaption, setExpandedCaption] = useState(false)
   const [likeAnimationKey, setLikeAnimationKey] = useState(0)
   const [heartBurstVisible, setHeartBurstVisible] = useState(false)
   const [displayLiked, setDisplayLiked] = useState(post.isLikedByCurrentUser)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [selectedReportReason, setSelectedReportReason] = useState(REPORT_REASON_OPTIONS[0])
+  const [customReportReason, setCustomReportReason] = useState('')
+  const [reportError, setReportError] = useState<string | null>(null)
+  const [isReporting, setIsReporting] = useState(false)
   const liked = displayLiked
+  const isOwner = currentUserId === post.user.id
 
   const caption = (post.content ?? '').trim()
   const originalPost = post.originalPost ?? null
@@ -37,6 +50,10 @@ export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProp
     setDisplayLiked(post.isLikedByCurrentUser)
   }, [post.id, post.isLikedByCurrentUser])
 
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [post.id])
+
   const handleLikeToggle = () => {
     setDisplayLiked((value) => !value)
     if (!liked) {
@@ -52,6 +69,38 @@ export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProp
     if (!liked) {
       setLikeAnimationKey((value) => value + 1)
       onLike(post.id)
+    }
+  }
+
+  const closeReportModal = () => {
+    if (isReporting) {
+      return
+    }
+
+    setReportModalOpen(false)
+    setReportError(null)
+  }
+
+  const submitReport = async () => {
+    const reason = selectedReportReason === 'Khác' ? customReportReason.trim() : selectedReportReason
+
+    if (reason.length < 5) {
+      setReportError('Lý do báo cáo tối thiểu 5 ký tự.')
+      return
+    }
+
+    setIsReporting(true)
+    setReportError(null)
+
+    try {
+      await onReport(post.id, reason)
+      setReportModalOpen(false)
+      setCustomReportReason('')
+      setSelectedReportReason(REPORT_REASON_OPTIONS[0])
+    } catch (error) {
+      setReportError(error instanceof Error ? error.message : 'Không thể gửi báo cáo bài viết.')
+    } finally {
+      setIsReporting(false)
     }
   }
 
@@ -76,7 +125,38 @@ export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProp
             <p className="text-xs text-ink-500 dark:text-ink-400">@{post.user.userName}</p>
           </div>
         </Link>
-        <time className="text-xs text-ink-500 dark:text-ink-400">{new Date(post.createdAt).toLocaleString()}</time>
+        <div className="flex items-center gap-1">
+          <time className="text-xs text-ink-500 dark:text-ink-400">{new Date(post.createdAt).toLocaleString()}</time>
+          {!isOwner ? (
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="Mở tùy chọn bài viết"
+                aria-expanded={menuOpen}
+                className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-50"
+                onClick={() => setMenuOpen((current) => !current)}
+              >
+                <Ellipsis className="h-4 w-4" />
+              </button>
+
+              {menuOpen ? (
+                <div className="absolute right-0 top-10 z-10 min-w-[190px] rounded-xl border border-ink-200 bg-white p-1 shadow-soft dark:border-ink-700 dark:bg-ink-900">
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-700 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/30"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      setReportModalOpen(true)
+                    }}
+                  >
+                    <Flag className="h-4 w-4" />
+                    Báo cáo bài viết
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </header>
 
       {post.imageUrl ? (
@@ -228,6 +308,57 @@ export function PostCard({ post, onLike, onShare, onOpenComments }: PostCardProp
           ))}
         </div>
       </div>
+
+      <Modal open={reportModalOpen} title="Báo cáo bài viết" onClose={closeReportModal}>
+        <div className="space-y-3">
+          <p className="text-sm text-ink-600 dark:text-ink-300">Chọn lý do để gửi báo cáo cho bài viết này.</p>
+
+          <div className="grid gap-2">
+            {REPORT_REASON_OPTIONS.map((reason) => (
+              <label
+                key={reason}
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 transition hover:border-brand-300 hover:bg-brand-50/40 dark:border-ink-700 dark:text-ink-200 dark:hover:border-brand-500"
+              >
+                <input
+                  type="radio"
+                  name={`report-reason-${post.id}`}
+                  value={reason}
+                  checked={selectedReportReason === reason}
+                  onChange={() => setSelectedReportReason(reason)}
+                />
+                <span>{reason}</span>
+              </label>
+            ))}
+          </div>
+
+          {selectedReportReason === 'Khác' ? (
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-ink-700 dark:text-ink-200" htmlFor={`custom-reason-${post.id}`}>
+                Lý do chi tiết
+              </label>
+              <textarea
+                id={`custom-reason-${post.id}`}
+                value={customReportReason}
+                onChange={(event) => setCustomReportReason(event.target.value)}
+                placeholder="Nhập lý do cụ thể (tối thiểu 5 ký tự)..."
+                rows={3}
+                className="w-full rounded-xl border border-ink-200 bg-white px-3 py-2 text-sm text-ink-800 outline-none transition focus:border-brand-400 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100"
+              />
+            </div>
+          ) : null}
+
+          {reportError ? <p className="form-error">{reportError}</p> : null}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="danger" busy={isReporting} onClick={() => void submitReport()}>
+              Gửi báo cáo
+            </Button>
+            <Button type="button" variant="ghost" disabled={isReporting} onClick={closeReportModal}>
+              Hủy
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </motion.article>
   )
 }

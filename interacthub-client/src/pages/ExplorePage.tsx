@@ -216,7 +216,7 @@ export function ExplorePage() {
                           className="justify-center rounded-xl px-3 py-2 text-sm"
                         >
                           <Check size={14} />
-                          Accept
+                          Đồng ý
                         </Button>
                         <Button
                           type="button"
@@ -226,7 +226,7 @@ export function ExplorePage() {
                           className="justify-center rounded-xl px-3 py-2 text-sm"
                         >
                           <X size={14} />
-                          Decline
+                          Từ chối
                         </Button>
                       </div>
                     </div>

@@ -9,12 +9,12 @@ namespace InteractHub.API.Services;
 public class AdminService : IAdminService
 {
     private readonly IRepository<PostReport> _reportsRepository;
-    private readonly IRepository<Post> _postsRepository;
+    private readonly IPostsService _postsService;
 
-    public AdminService(IRepository<PostReport> reportsRepository, IRepository<Post> postsRepository)
+    public AdminService(IRepository<PostReport> reportsRepository, IPostsService postsService)
     {
         _reportsRepository = reportsRepository;
-        _postsRepository = postsRepository;
+        _postsService = postsService;
     }
 
     public async Task<List<PostReportResponse>> GetReportsAsync()
@@ -47,14 +47,8 @@ public class AdminService : IAdminService
 
     public async Task<bool> DeletePostAsync(Guid postId)
     {
-        var post = await _postsRepository.Query().FirstOrDefaultAsync(p => p.Id == postId);
-        if (post is null)
-        {
-            return false;
-        }
-
-        _postsRepository.Delete(post);
-        await _postsRepository.SaveChangesAsync();
-        return true;
+        // Reuse the main post deletion flow so related likes/comments/reports/share links
+        // are handled consistently and do not violate restrict foreign keys.
+        return await _postsService.DeleteAsync(postId, string.Empty, true);
     }
 }

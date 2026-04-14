@@ -23,6 +23,7 @@ export function HomePage() {
     toggleLike,
     addComment,
     sharePost,
+    reportPost,
   } = usePosts()
   const { data: stories = [], isLoading: storiesLoading } = useStoriesQuery()
   const [showCreatePost, setShowCreatePost] = useState(false)
@@ -81,6 +82,7 @@ export function HomePage() {
 
       <Feed
         posts={posts}
+        currentUserId={user?.id}
         isLoading={isLoading}
         error={error}
         hasNextPage={hasNextPage}
@@ -93,6 +95,9 @@ export function HomePage() {
         }}
         onShare={(postId) => {
           sharePost.mutate(postId)
+        }}
+        onReport={async (postId, reason) => {
+          await reportPost.mutateAsync({ postId, reason })
         }}
         onOpenComments={(item) => setSelectedPost(item)}
       />
