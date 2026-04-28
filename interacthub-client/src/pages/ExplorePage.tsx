@@ -177,7 +177,7 @@ export function ExplorePage() {
             />
           </div>
 
-          {error ? <p className="form-error">{error}</p> : null}
+          {error ? <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</p> : null}
 
           {loadingRequests ? <p className="text-sm text-slate-500">Đang tải lời mời kết bạn...</p> : null}
 

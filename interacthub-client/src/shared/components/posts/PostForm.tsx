@@ -68,8 +68,8 @@ export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
   })
 
   return (
-    <form className="post-form" onSubmit={submit}>
-      <h2 className="title-with-icon">
+    <form className="space-y-4 rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm sm:p-5" onSubmit={submit}>
+      <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
         <PenSquare size={18} aria-hidden="true" />
         <span>Tạo bài viết của bạn</span>
       </h2>
@@ -110,7 +110,7 @@ export function PostForm({ onSubmitPost, busy = false }: PostFormProps) {
         })}
       />
 
-      {submitError ? <p className="form-error">{submitError}</p> : null}
+      {submitError ? <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{submitError}</p> : null}
 
       <Button type="submit" busy={busy || uploading}>
         <SendHorizontal size={15} aria-hidden="true" />

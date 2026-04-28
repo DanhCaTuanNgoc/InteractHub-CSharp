@@ -22,10 +22,10 @@ export function MainSidebar({ showAdmin }: MainSidebarProps) {
   return (
     <>
       <aside className="hidden xl:block">
-        <div className="fixed top-24 z-40 w-[250px] max-h-[calc(100vh-7rem)] overflow-y-auto space-y-5 rounded-3xl border border-ink-200/70 bg-white/65 p-5 shadow-soft backdrop-blur-xl xl:left-[max(1.25rem,calc(50%-490px))] 2xl:left-[max(1.25rem,calc(50%-725px))] dark:border-ink-700 dark:bg-ink-900/75">
+        <div className="fixed top-24 z-40 w-[250px] max-h-[calc(100vh-7rem)] space-y-5 overflow-y-auto rounded-3xl border border-slate-200/70 bg-white/70 p-5 shadow-xl backdrop-blur-xl xl:left-[max(1.25rem,calc(50%-490px))] 2xl:left-[max(1.25rem,calc(50%-725px))]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">InteractHub</p>
-            <h1 className="mt-2 font-title text-2xl text-ink-900 dark:text-white">Social Studio</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">InteractHub</p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-900">Social Studio</h1>
           </div>
 
           <nav className="space-y-1">
@@ -36,8 +36,8 @@ export function MainSidebar({ showAdmin }: MainSidebarProps) {
                 end={item.to === ROUTES.home}
                 className={({ isActive }) =>
                   isActive
-                    ? 'flex items-center gap-3 rounded-2xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800 dark:bg-ink-100 dark:text-brand-300'
-                    : 'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-600'
+                    ? 'relative flex items-center gap-3 rounded-2xl bg-gradient-to-r from-cyan-50 via-white to-amber-50 px-4 py-3 text-sm font-semibold text-cyan-900 ring-1 ring-cyan-300 shadow-sm before:absolute before:bottom-2 before:left-0 before:top-2 before:w-1 before:rounded-r-full before:bg-cyan-500'
+                    : 'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white'
                 }
               >
                 <item.icon size={16} />
@@ -48,7 +48,7 @@ export function MainSidebar({ showAdmin }: MainSidebarProps) {
         </div>
       </aside>
 
-      <nav className="fixed bottom-3 left-1/2 z-40 flex w-[min(96vw,620px)] -translate-x-1/2 items-center justify-between rounded-2xl border border-ink-200/80 bg-white/88 px-2 py-1 shadow-soft-xl backdrop-blur-xl xl:hidden dark:border-ink-700 dark:bg-ink-900/88">
+      <nav className="fixed bottom-3 left-1/2 z-40 flex w-[min(96vw,620px)] -translate-x-1/2 items-center justify-between rounded-2xl border border-slate-200/80 bg-white/90 px-2 py-1 shadow-xl backdrop-blur-xl xl:hidden">
         {allNavItems.map((item) => (
           <NavLink
             key={item.to}
@@ -56,8 +56,8 @@ export function MainSidebar({ showAdmin }: MainSidebarProps) {
             end={item.to === ROUTES.home}
             className={({ isActive }) =>
               isActive
-                ? 'inline-flex min-w-[56px] flex-col items-center gap-1 rounded-xl bg-brand-50 px-2 py-2 text-[11px] font-semibold text-brand-700 dark:bg-ink-800 dark:text-brand-300'
-                : 'inline-flex min-w-[56px] flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800'
+                ? 'relative inline-flex min-w-[56px] flex-col items-center gap-1 rounded-xl bg-gradient-to-b from-cyan-50 to-white px-2 py-2 text-[11px] font-semibold text-cyan-800 ring-1 ring-cyan-300 shadow-sm before:absolute before:bottom-1 before:left-1/2 before:h-0.5 before:w-8 before:-translate-x-1/2 before:rounded-full before:bg-cyan-500'
+                : 'inline-flex min-w-[56px] flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white'
             }
           >
             <item.icon size={15} />

@@ -55,16 +55,16 @@ export function AdminPage() {
   }
 
   return (
-    <section className="cards-section cards-section--single admin-page mt-2 grid grid-cols-1 gap-4 sm:mt-4">
-      <article className="status-card admin-page__panel p-4 sm:p-5 lg:p-6">
-        <header className="admin-page__hero">
+    <section className="mt-2 grid grid-cols-1 gap-4 sm:mt-4">
+      <article className="rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-xl backdrop-blur-xl sm:p-5 lg:p-6">
+        <header className="space-y-2">
           <div>
-            <p className="admin-page__eyebrow">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">
               <ShieldCheck size={14} aria-hidden="true" />
               Quản trị
             </p>
-            <h1>Báo cáo vi phạm</h1>
-            <p>Quản lý báo cáo và xử lý bài viết vi phạm từ hệ thống quản trị.</p>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">Báo cáo vi phạm</h1>
+            <p className="mt-1 text-sm text-slate-600">Quản lý báo cáo và xử lý bài viết vi phạm từ hệ thống quản trị.</p>
           </div>
         </header>
 
@@ -74,43 +74,43 @@ export function AdminPage() {
           </Button>
         </div>
 
-        {error ? <p className="form-error mt-3">{error}</p> : null}
+        {error ? <p className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</p> : null}
 
-        {loading ? <p className="mt-3">Đang tải danh sách báo cáo...</p> : null}
+        {loading ? <p className="mt-3 text-sm text-slate-500">Đang tải danh sách báo cáo...</p> : null}
 
-        {!loading && reports.length === 0 ? <p className="mt-3">Chưa có báo cáo cần xử lý.</p> : null}
+        {!loading && reports.length === 0 ? <p className="mt-3 text-sm text-slate-500">Chưa có báo cáo cần xử lý.</p> : null}
 
-        <div className="explore-result admin-page__list mt-4">
+        <div className="mt-4 grid gap-3">
           {reports.map((report) => (
-            <article key={report.id} className="status-card admin-report-card">
-              <h2>Báo cáo #{report.id.slice(0, 8)}</h2>
+            <article key={report.id} className="space-y-3 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+              <h2 className="text-base font-semibold text-slate-900">Báo cáo #{report.id.slice(0, 8)}</h2>
 
-              <dl className="admin-report-card__meta">
+              <dl className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
                 <div>
-                  <dt>Trạng thái</dt>
-                  <dd>{report.status}</dd>
+                  <dt className="font-medium text-slate-500">Trạng thái</dt>
+                  <dd className="text-slate-900">{report.status}</dd>
                 </div>
                 <div>
-                  <dt>Lý do</dt>
-                  <dd>{report.reason}</dd>
+                  <dt className="font-medium text-slate-500">Lý do</dt>
+                  <dd className="text-slate-900">{report.reason}</dd>
                 </div>
                 <div>
-                  <dt>Người báo cáo</dt>
-                  <dd>
+                  <dt className="font-medium text-slate-500">Người báo cáo</dt>
+                  <dd className="text-slate-900">
                     {report.reporter.fullName} (@{report.reporter.userName})
                   </dd>
                 </div>
                 <div>
-                  <dt>Mã bài viết</dt>
-                  <dd>{report.postId}</dd>
+                  <dt className="font-medium text-slate-500">Mã bài viết</dt>
+                  <dd className="text-slate-900">{report.postId}</dd>
                 </div>
                 <div>
-                  <dt>Thời gian tạo</dt>
-                  <dd>{new Date(report.createdAt).toLocaleString()}</dd>
+                  <dt className="font-medium text-slate-500">Thời gian tạo</dt>
+                  <dd className="text-slate-900">{new Date(report.createdAt).toLocaleString()}</dd>
                 </div>
               </dl>
 
-              <div className="post-card__inline-actions mt-3">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Button
                   type="button"
                   variant="primary"

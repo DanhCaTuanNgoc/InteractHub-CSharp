@@ -27,11 +27,20 @@ export function Button({
     setRippleStyle({ left, top, size })
   }
 
+  const variantClasses = {
+    primary:
+      'border border-transparent bg-cyan-600 text-white shadow-sm hover:bg-cyan-500 focus-visible:outline-cyan-500',
+    ghost:
+      'border border-slate-200 bg-white text-slate-700 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700 focus-visible:outline-cyan-500',
+    danger:
+      'border border-transparent bg-rose-600 text-white shadow-sm hover:bg-rose-500 focus-visible:outline-rose-500',
+  }[variant]
+
   const classes = [
-    'button ui-interactive ui-ripple',
-    `button--${variant}`,
-    fullWidth ? 'button--full' : '',
-    busy ? 'button--busy' : '',
+    'relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-2xl px-4 py-2.5 text-sm font-semibold transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 cursor-pointer',
+    variantClasses,
+    fullWidth ? 'w-full' : '',
+    busy ? 'cursor-wait' : '',
     className ?? '',
   ]
     .filter(Boolean)
@@ -42,7 +51,7 @@ export function Button({
       {rippleStyle ? (
         <span
           key={`${rippleStyle.left}-${rippleStyle.top}-${rippleStyle.size}`}
-          className="ui-ripple__wave"
+          className="pointer-events-none absolute rounded-full bg-white/30"
           style={{ left: rippleStyle.left, top: rippleStyle.top, width: rippleStyle.size, height: rippleStyle.size }}
           aria-hidden="true"
         />

@@ -133,7 +133,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
                 type="button"
                 aria-label="Mở tùy chọn bài viết"
                 aria-expanded={menuOpen}
-                className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-50"
+                className="ui-interactive cursor-pointer ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-50"
                 onClick={() => setMenuOpen((current) => !current)}
               >
                 <Ellipsis className="h-4 w-4" />
@@ -143,7 +143,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
                 <div className="absolute right-0 top-10 z-10 min-w-[190px] rounded-xl border border-ink-200 bg-white p-1 shadow-soft dark:border-ink-700 dark:bg-ink-900">
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-700 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/30"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-700 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/30 cursor-pointer"
                     onClick={() => {
                       setMenuOpen(false)
                       setReportModalOpen(true)
@@ -202,7 +202,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
               <button
                 key={`${post.id}-${tag}`}
                 type="button"
-                className="inline-flex items-center gap-1 rounded-full border border-brand-200/70 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700 transition hover:border-brand-400 hover:bg-brand-100 dark:border-brand-500/40 dark:bg-brand-900/20 dark:text-brand-200 dark:hover:bg-brand-900/35"
+                className="inline-flex items-center gap-1 rounded-full border border-brand-200/70 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700 transition hover:border-brand-400 hover:bg-brand-100 dark:border-brand-500/40 dark:bg-brand-900/20 dark:text-brand-200 dark:hover:bg-brand-900/35 cursor-pointer"
               >
                 {tag}
               </button>
@@ -233,7 +233,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
                 {originalPost.hashtags.map((tag) => (
                   <span
                     key={`${originalPost.id}-${tag}`}
-                    className="inline-flex items-center gap-1 rounded-full border border-ink-200/80 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-ink-600 dark:border-ink-600 dark:bg-ink-700/70 dark:text-ink-200"
+                    className="inline-flex items-center gap-1 rounded-full border border-ink-200/80 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-ink-600 dark:border-ink-600 dark:bg-ink-700/70 dark:text-ink-200 cursor-pointer"
                   >
                     {tag}
                   </span>
@@ -258,7 +258,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
             whileTap={{ scale: 0.92 }}
             onClick={handleLikeToggle}
             aria-pressed={liked}
-            className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
+            className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800 cursor-pointer"
           >
             <motion.span
               key={likeAnimationKey}
@@ -273,7 +273,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
           <button
             type="button"
             onClick={() => onOpenComments(post)}
-            className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
+            className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800 cursor-pointer"
           >
             <MessageCircle className="h-5 w-5" />
           </button>
@@ -281,7 +281,7 @@ export function PostCard({ post, currentUserId, onLike, onShare, onOpenComments,
           <button
             type="button"
             onClick={() => onShare(post.id)}
-            className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
+            className="ui-interactive ui-ripple-static inline-flex items-center justify-center rounded-full p-2 text-ink-600 transition-colors hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800 cursor-pointer"
           >
             <Send className="h-5 w-5" />
           </button>

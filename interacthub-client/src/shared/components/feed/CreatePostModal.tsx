@@ -85,14 +85,14 @@ export function CreatePostModal({ open, busy = false, onClose, onSubmitPost }: C
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
+                className="cursor-pointer rounded-xl px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
               >
                 Hủy
               </button>
               <button
                 type="submit"
                 disabled={busy || uploading}
-                className="rounded-xl bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                className="cursor-pointer rounded-xl bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {busy || uploading ? 'Đang đăng...' : 'Đăng bài'}
               </button>

@@ -31,52 +31,52 @@ export function HomePage() {
 
   return (
     <section className="space-y-4">
-    <header className="overflow-hidden rounded-3xl border border-ink-200/70 bg-white/70 p-4 shadow-soft backdrop-blur-xl dark:border-ink-700 dark:bg-ink-900/75">
-      <div className="rounded-2xl border border-ink-200/70 bg-white/75 p-3 shadow-soft dark:border-ink-700 dark:bg-ink-900/70">
-        <div className="flex items-center gap-3">
-          <Avatar src={user?.avatarUrl ?? null} alt={user?.fullName ?? user?.username ?? 'User'} />
+      <header className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-xl backdrop-blur-xl">
+        <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <Avatar src={user?.avatarUrl ?? null} alt={user?.fullName ?? user?.username ?? 'User'} />
 
-          <button
-            type="button"
-            onClick={() => setShowCreatePost(true)}
-            className="flex-1 cursor-pointer rounded-2xl border border-ink-200/80 bg-ink-50 px-4 py-2.5 text-left text-sm text-ink-500 transition hover:border-brand-300 hover:bg-white hover:text-ink-700 dark:border-ink-700 dark:bg-ink-800/70 dark:text-ink-300 dark:hover:border-brand-500/70 dark:hover:bg-ink-800"
-          >
-            {user?.fullName ? `${user.fullName}, bạn đang nghĩ gì hôm nay?` : 'Bạn đang nghĩ gì hôm nay?'}
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowCreatePost(true)}
+              className="flex-1 cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-left text-sm text-slate-500 transition hover:border-cyan-300 hover:bg-white hover:text-slate-800"
+            >
+              {user?.fullName ? `${user.fullName}, bạn đang nghĩ gì hôm nay?` : 'Bạn đang nghĩ gì hôm nay?'}
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setShowCreatePost(true)}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-brand px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5"
-          >
-            <Sparkles size={15} />
-            Đăng bài
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowCreatePost(true)}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-600 to-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
+            >
+              <Sparkles size={15} />
+              Đăng bài
+            </button>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3">
+            <button
+              type="button"
+              onClick={() => setShowCreatePost(true)}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-100/80 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-200"
+            >
+              <ImagePlus size={14} className="text-cyan-600" />
+              Ảnh / Video
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowCreatePost(true)}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-100/80 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-200"
+            >
+              <MessageCircle size={14} className="text-cyan-600" />
+              Chia sẻ cảm nghĩ
+            </button>
+          </div>
         </div>
+      </header>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink-200/70 pt-3 dark:border-ink-700">
-          <button
-            type="button"
-            onClick={() => setShowCreatePost(true)}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-ink-100/80 px-3 py-2 text-xs font-medium text-ink-700 transition hover:bg-ink-200 dark:bg-ink-800/70 dark:text-ink-200 dark:hover:bg-ink-700"
-          >
-            <ImagePlus size={14} className="text-brand-600 dark:text-brand-300" />
-            Ảnh / Video
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowCreatePost(true)}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-ink-100/80 px-3 py-2 text-xs font-medium text-ink-700 transition hover:bg-ink-200 dark:bg-ink-800/70 dark:text-ink-200 dark:hover:bg-ink-700"
-          >
-            <MessageCircle size={14} className="text-brand-600 dark:text-brand-300" />
-            Chia sẻ cảm nghĩ
-          </button>
-        </div>
-      </div>
-    </header>
-
-      <section className="rounded-3xl border border-ink-200/70 bg-white/70 p-4 shadow-soft backdrop-blur-xl dark:border-ink-700 dark:bg-ink-900/75">
+      <section className="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-xl backdrop-blur-xl">
         <StoriesStrip stories={stories} loading={storiesLoading} />
       </section>
 

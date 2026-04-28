@@ -82,7 +82,7 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
         <button
           type="button"
           onClick={() => onLike(post.id)}
-          className="ui-interactive ui-ripple-static inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
+          className="ui-interactive ui-ripple-static inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
         >
           <Heart size={16} />
           {post.likeCount}
@@ -91,7 +91,7 @@ export function FeedPostCard({ post, onLike, onOpenComments }: FeedPostCardProps
         <button
           type="button"
           onClick={() => onOpenComments(post)}
-          className="ui-interactive ui-ripple-static inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
+          className="ui-interactive ui-ripple-static inline-flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-50"
         >
           <MessageCircle size={16} />
           {post.commentCount} bình luận

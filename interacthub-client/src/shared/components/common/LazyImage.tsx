@@ -18,7 +18,14 @@ export function LazyImage({
   const [loaded, setLoaded] = useState(false)
 
   return (
-    <span className={`lazy-image-wrap ${loaded ? 'lazy-image-wrap--loaded' : ''} ${wrapperClassName ?? ''}`.trim()}>
+    <span
+      className={[
+        'relative inline-flex overflow-hidden bg-slate-100',
+        wrapperClassName ?? '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <img
         {...props}
         src={src}
@@ -29,7 +36,13 @@ export function LazyImage({
           setLoaded(true)
           onLoad?.(event)
         }}
-        className={`lazy-image ${loaded ? 'lazy-image--loaded' : ''} ${className ?? ''}`.trim()}
+        className={[
+          'h-full w-full transition-opacity duration-300',
+          loaded ? 'opacity-100' : 'opacity-0',
+          className ?? '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       />
     </span>
   )

@@ -82,14 +82,14 @@ export function CommentsModal({ post, open, busy = false, onClose, onSubmitComme
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-xl px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
+                  className="cursor-pointer rounded-xl px-4 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-800"
                 >
                   Đóng
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-xl bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="cursor-pointer rounded-xl bg-gradient-brand px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {busy ? 'Đang gửi...' : 'Gửi bình luận'}
                 </button>

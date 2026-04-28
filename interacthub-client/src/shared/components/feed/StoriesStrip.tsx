@@ -100,7 +100,7 @@ export function StoriesStrip({ stories, loading }: StoriesStripProps) {
             transition={{ delay: index * 0.03 }}
             className="w-20 shrink-0"
           >
-            <button type="button" onClick={() => setActiveStoryId(story.id)} className="block w-full text-center">
+            <button type="button" onClick={() => setActiveStoryId(story.id)} className="block w-full cursor-pointer text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[conic-gradient(from_90deg,_#0f766e,_#f59e0b,_#0f766e)] p-[2px]">
                 <img
                   src={story.user.avatarUrl ?? story.mediaUrl}

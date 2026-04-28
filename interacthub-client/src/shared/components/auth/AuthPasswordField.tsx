@@ -31,7 +31,7 @@ export const AuthPasswordField = forwardRef<HTMLInputElement, AuthPasswordFieldP
       rightSlot={
         <button
           type="button"
-          className="auth-field__toggle"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
           onClick={() => setIsVisible((current) => !current)}
           aria-label={isVisible ? 'Hide password' : 'Show password'}
           aria-pressed={isVisible}

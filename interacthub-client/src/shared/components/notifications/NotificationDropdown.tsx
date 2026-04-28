@@ -127,7 +127,7 @@ export function NotificationDropdown({ triggerIcon }: NotificationDropdownProps)
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="Open notifications"
-        className="ui-interactive ui-ripple-static relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-ink-200/70 bg-white/70 text-ink-700 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80 dark:text-ink-100"
+        className="ui-interactive ui-ripple-static relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-ink-200/70 bg-white/70 text-ink-700 transition hover:-translate-y-0.5 hover:shadow-soft dark:border-ink-700 dark:bg-ink-900/80 dark:text-ink-100"
       >
         {triggerIcon ?? <Bell size={16} />}
       </button>
@@ -166,7 +166,7 @@ export function NotificationDropdown({ triggerIcon }: NotificationDropdownProps)
                 type="button"
                 disabled={unreadCount === 0 || markingAllRead}
                 onClick={() => void markAllRead()}
-                className="ui-interactive ui-ripple-static inline-flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold text-brand-700 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-300 dark:hover:bg-ink-800"
+                className="ui-interactive ui-ripple-static inline-flex cursor-pointer items-center gap-1 rounded-xl px-2 py-1 text-xs font-semibold text-brand-700 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-300 dark:hover:bg-ink-800"
               >
                 <CheckCheck size={13} />
                 Đánh dấu đã đọc

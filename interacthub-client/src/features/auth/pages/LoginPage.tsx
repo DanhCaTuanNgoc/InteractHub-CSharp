@@ -92,17 +92,19 @@ export function LoginPage() {
 
   return (
     <motion.main
-      className="auth-layout"
+      className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_5%_5%,rgba(10,147,150,0.2),transparent_36%),radial-gradient(circle_at_90%_12%,rgba(238,155,0,0.18),transparent_34%),linear-gradient(145deg,#f8f4ea_0%,#efe7d7_100%)] px-4 py-10 sm:px-6 lg:px-8"
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      <section className="auth-card auth-card--narrow">
-        <p className="auth-card__eyebrow">Chào mừng bạn quay lại</p>
-        <h1>Đăng nhập vào InteractHub</h1>
-        <p>Quản lý bảng tin, tin và thông báo của bạn tại một nơi.</p>
+      <div className="pointer-events-none absolute inset-0 bg-grid-soft opacity-30" />
 
-        <form className="auth-form" onSubmit={onSubmit} noValidate>
+      <section className="relative mx-auto w-full max-w-md rounded-[2rem] border border-white/70 bg-white/82 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">Chào mừng bạn quay lại</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">Đăng nhập vào InteractHub</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Quản lý bảng tin, tin và thông báo của bạn tại một nơi.</p>
+
+        <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
           <AuthTextField
             label="Email hoặc tên người dùng"
             type="text"
@@ -151,13 +153,13 @@ export function LoginPage() {
             fullWidth
             busy={isSubmitting}
             disabled={!isValid || isSubmitting}
-            className="auth-submit-btn"
+            className="mt-2 cursor-pointer"
           >
             Đăng nhập
           </Button>
         </form>
 
-        <p className="auth-card__footnote">
+        <p className="mt-6 text-center text-sm text-slate-600">
           Chưa có tài khoản? <Link to={ROUTES.register}>Đăng ký ngay</Link>
         </p>
       </section>
